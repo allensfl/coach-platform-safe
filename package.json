@@ -1,0 +1,19 @@
+{
+  "name": "coach-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "dev:mission-control": "pnpm --filter mission-control dev",
+    "dev:all": "pnpm --parallel --filter './apps/*' dev",
+    "build:all": "pnpm --filter './apps/*' build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
