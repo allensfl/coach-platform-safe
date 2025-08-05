@@ -1,1 +1,1 @@
-export { InvoiceBuilder } from './InvoiceBuilder';
+export { default } from './InvoiceBuilder';

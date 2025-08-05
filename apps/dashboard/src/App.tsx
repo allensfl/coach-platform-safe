@@ -18,7 +18,7 @@ import ClientList from './modules/client-management/components/ClientList';
 import SessionCalendar from './modules/session-management/components/SessionCalendar';
 import NewClientModal from './modules/client-management/components/NewClientModal';
 import NewSessionModal from './modules/session-management/components/NewSessionModal';
-import { InvoiceBuilder } from './components/invoices';
+import InvoiceBuilder from './components/invoices';
 import Analytics from './components/Analytics';
 import Settings from './components/Settings';
 
