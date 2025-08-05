@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import NewSessionModal from './NewSessionModal';
 
 interface CalendarDay {
@@ -23,17 +22,21 @@ interface Session {
 }
 
 const SessionCalendar: React.FC = () => {
-  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [isAddSessionOpen, setIsAddSessionOpen] = useState(false);
+  
+  // NEW: Session Details Modal State
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [showSessionDetails, setShowSessionDetails] = useState(false);
+  
   const [sessions, setSessions] = useState<Session[]>([
     {
       id: 's1',
       clientId: '1',
       clientName: 'Max Mustermann',
-      date: '2025-07-30',
+      date: '2025-08-05', // Heute
       startTime: '10:00',
       duration: 90,
       title: 'Karriereplanung & Zielsetzung',
@@ -45,13 +48,25 @@ const SessionCalendar: React.FC = () => {
       id: 's2',
       clientId: '2',
       clientName: 'Anna Schmidt',
-      date: '2025-07-31',
+      date: '2025-08-06', // Morgen
       startTime: '16:00',
       duration: 60,
       title: 'Work-Life-Balance Check-in',
       status: 'scheduled',
       type: 'follow-up',
       location: 'online'
+    },
+    {
+      id: 's3',
+      clientId: '3',
+      clientName: 'Sarah Müller',
+      date: '2025-08-07',
+      startTime: '14:00',
+      duration: 60,
+      title: 'Teamführung Workshop',
+      status: 'scheduled',
+      type: 'coaching',
+      location: 'office'
     }
   ]);
 
@@ -59,7 +74,8 @@ const SessionCalendar: React.FC = () => {
   const clients = [
     { id: '1', firstName: 'Max', lastName: 'Mustermann', email: 'max@example.com' },
     { id: '2', firstName: 'Anna', lastName: 'Schmidt', email: 'anna@example.com' },
-    { id: '3', firstName: 'Thomas', lastName: 'Weber', email: 'thomas@example.com' }
+    { id: '3', firstName: 'Sarah', lastName: 'Müller', email: 'sarah@example.com' },
+    { id: '4', firstName: 'Michael', lastName: 'Weber', email: 'michael@example.com' }
   ];
 
   const monthNames = [
@@ -167,13 +183,14 @@ const SessionCalendar: React.FC = () => {
     const client = clients.find(c => c.id === sessionData.clientId);
     const newSession: Session = {
       ...sessionData,
+      id: `s${Date.now()}`,
       clientName: client ? `${client.firstName} ${client.lastName}` : 'Unbekannter Klient'
     };
     
     setSessions(prev => [...prev, newSession]);
     
-    // Show success message (in real app, this would be a proper notification)
-    alert(`Session "${sessionData.title}" wurde erfolgreich erstellt für ${newSession.clientName} am ${new Date(sessionData.date).toLocaleDateString('de-DE')} um ${sessionData.startTime} Uhr.`);
+    // Show success message
+    alert(`✅ SESSION ERSTELLT!\n\n🎯 ${sessionData.title || 'Neue Session'}\n👤 Klient: ${newSession.clientName}\n📅 Datum: ${new Date(sessionData.date).toLocaleDateString('de-DE')}\n⏰ Zeit: ${sessionData.startTime} Uhr\n⏱️ Dauer: ${sessionData.duration || 60} Minuten\n\n🎉 Session wurde erfolgreich im Kalender eingetragen!`);
   };
 
   const handleCalendarDayClick = (date: Date) => {
@@ -185,6 +202,24 @@ const SessionCalendar: React.FC = () => {
     const today = new Date();
     setSelectedDate(today);
     setIsAddSessionOpen(true);
+  };
+
+  // NEW: Handle Session Click - FIXED!
+  const handleSessionClick = (session: Session, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedSession(session);
+    setShowSessionDetails(true);
+  };
+
+  // NEW: Handle Session Details/Plan - FIXED!
+  const handleSessionAction = (session: Session, action: 'details' | 'plan') => {
+    if (action === 'details') {
+      setSelectedSession(session);
+      setShowSessionDetails(true);
+    } else if (action === 'plan') {
+      // Show session planning info
+      alert(`📋 SESSION PLANUNG\n\n🎯 ${session.title}\n👤 Klient: ${session.clientName}\n📅 ${new Date(session.date).toLocaleDateString('de-DE')}\n⏰ ${formatTime(session.startTime)} - ${session.duration} Min\n📍 ${session.location === 'office' ? 'Büro' : 'Online'}\n\n💡 Hier würde die Session-Planung mit den 10 Coaching-Methoden geöffnet werden.`);
+    }
   };
 
   return (
@@ -293,17 +328,14 @@ const SessionCalendar: React.FC = () => {
                       {day.date.getDate()}
                     </div>
                     
-                    {/* Sessions for this day */}
+                    {/* Sessions for this day - FIXED CLICKS! */}
                     <div className="space-y-1">
                       {day.sessions.slice(0, 2).map((session) => (
                         <div
                           key={session.id}
                           className={`text-xs p-1 rounded border ${getSessionStatusColor(session.status)} truncate cursor-pointer hover:shadow-sm`}
                           title={`${formatTime(session.startTime || '')} - ${session.clientName}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/sessions/${session.id}/plan`);
-                          }}
+                          onClick={(e) => handleSessionClick(session, e)}
                         >
                           <div className="font-medium">
                             {session.startTime && formatTime(session.startTime)}
@@ -388,13 +420,13 @@ const SessionCalendar: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <button
-                          onClick={() => navigate(`/sessions/${session.id}`)}
+                          onClick={() => handleSessionAction(session, 'details')}
                           className="text-xs text-gray-600 hover:text-gray-800 font-medium"
                         >
                           Details
                         </button>
                         <button
-                          onClick={() => navigate(`/sessions/${session.id}/plan`)}
+                          onClick={() => handleSessionAction(session, 'plan')}
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
                           📋 Plan Session
@@ -455,13 +487,13 @@ const SessionCalendar: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between ml-12">
                         <button
-                          onClick={() => navigate(`/sessions/${session.id}`)}
+                          onClick={() => handleSessionAction(session, 'details')}
                           className="text-xs text-gray-600 hover:text-gray-800 font-medium"
                         >
                           Details
                         </button>
                         <button
-                          onClick={() => navigate(`/sessions/${session.id}/plan`)}
+                          onClick={() => handleSessionAction(session, 'plan')}
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
                           📋 Planen
@@ -509,6 +541,138 @@ const SessionCalendar: React.FC = () => {
         onSubmit={handleNewSession}
         selectedDate={selectedDate || undefined}
       />
+
+      {/* SESSION DETAILS MODAL - NEW! */}
+      {showSessionDetails && selectedSession && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Session Details</h3>
+              <button
+                onClick={() => setShowSessionDetails(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Session Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Session Information</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Titel</label>
+                      <p className="text-sm text-gray-900">{selectedSession.title}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Datum</label>
+                      <p className="text-sm text-gray-900">
+                        {new Date(selectedSession.date).toLocaleDateString('de-DE', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Zeit</label>
+                      <p className="text-sm text-gray-900">{formatTime(selectedSession.startTime)} Uhr</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Dauer</label>
+                      <p className="text-sm text-gray-900">{selectedSession.duration} Minuten</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Klient & Details</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Klient</label>
+                      <p className="text-sm text-gray-900">{selectedSession.clientName}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Typ</label>
+                      <p className="text-sm text-gray-900">
+                        {selectedSession.type === 'coaching' ? 'Coaching Session' : 
+                         selectedSession.type === 'follow-up' ? 'Follow-up' : selectedSession.type}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ort</label>
+                      <p className="text-sm text-gray-900">
+                        {selectedSession.location === 'office' ? 'Büro' :
+                         selectedSession.location === 'online' ? 'Online' : selectedSession.location}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Status</label>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSessionStatusColor(selectedSession.status)}`}>
+                        {selectedSession.status === 'scheduled' ? 'Geplant' :
+                         selectedSession.status === 'completed' ? 'Abgeschlossen' :
+                         selectedSession.status === 'cancelled' ? 'Abgesagt' : selectedSession.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coaching Methods Preview */}
+              <div>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Coaching-Methoden</h4>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 mb-3">
+                    Verfügbare Coaching-Methoden für diese Session:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-600">🌐</span>
+                      <span>Systemisches Coaching</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-600">💡</span>
+                      <span>Lösungsorientiertes Coaching</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-purple-600">💪</span>
+                      <span>Ressourcenorientiertes Coaching</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-orange-600">🎯</span>
+                      <span>Zielorientiertes Coaching</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={() => setShowSessionDetails(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Schließen
+              </button>
+              <button
+                onClick={() => {
+                  setShowSessionDetails(false);
+                  handleSessionAction(selectedSession, 'plan');
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                📋 Session planen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
