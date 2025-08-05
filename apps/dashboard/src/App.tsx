@@ -350,12 +350,22 @@ RECHNUNGSDETAILS:
 
       case 'invoices':
         return (
-          <InvoiceBuilder
-            clients={clients}
-            onSave={handleSaveInvoice}
-            onPreview={handlePreviewInvoice}
-            onSend={handleSendInvoice}
-          />
+        <InvoiceBuilder
+  clients={clients.map(c => ({
+    id: c.id,
+    firstName: c.name.split(' ')[0],
+    lastName: c.name.split(' ')[1] || '',
+    email: c.email,
+    address: c.address
+  }))}
+  onSave={handleSaveInvoice}
+  onPreview={handlePreviewInvoice}
+  onSend={handleSendInvoice}
+  onCreateClient={(clientData) => {
+    console.log('New client from invoice:', clientData);
+    alert(`✅ NEUER KLIENT ERSTELLT!\n\n👤 Name: ${clientData.firstName} ${clientData.lastName}\n📧 Email: ${clientData.email}`);
+  }}
+/>
         );
 
       case 'analytics':

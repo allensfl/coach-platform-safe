@@ -206,16 +206,48 @@ export const InvoiceBuilder: React.FC<InvoiceBuilderProps> = ({
   };
 
   const handlePreview = () => {
-    if (!validateForm()) return;
-    handleSave();
-    // onPreview will be called after save
+  if (!validateForm()) return;
+  
+  const invoice = {
+    // ... existing invoice object from handleSave
+    clientId: formData.clientId,
+    clientEmail: clients.find(c => c.id === formData.clientId)?.email,
+    items: formData.items,
+    subtotal: calculations.subtotal,
+    taxRate: formData.taxRate,
+    taxAmount: calculations.taxAmount,
+    total: calculations.total,
+    currency: formData.currency,
+    notes: formData.notes,
+    terms: formData.terms,
+    paymentTerms: formData.paymentTerms,
+    status: 'draft'
   };
+  
+  onPreview(invoice);
+};
 
-  const handleSend = () => {
-    if (!validateForm()) return;
-    handleSave();
-    // onSend will be called after save
+const handleSend = () => {
+  if (!validateForm()) return;
+  
+  const invoice = {
+    // ... existing invoice object from handleSave
+    clientId: formData.clientId,
+    clientEmail: clients.find(c => c.id === formData.clientId)?.email,
+    items: formData.items,
+    subtotal: calculations.subtotal,
+    taxRate: formData.taxRate,
+    taxAmount: calculations.taxAmount,
+    total: calculations.total,
+    currency: formData.currency,
+    notes: formData.notes,
+    terms: formData.terms,
+    paymentTerms: formData.paymentTerms,
+    status: 'draft'
   };
+  
+  onSend(invoice);
+};
 
   // ==========================================
   // STEP NAVIGATION
