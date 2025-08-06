@@ -63,12 +63,13 @@ const ClientDetailView: React.FC<ClientDetailViewProps> = ({
   const age = calculateAge(safeClient.birthDate);
 
   const tabs = [
-    { id: 'overview', label: 'Übersicht', icon: <Target className="w-4 h-4" /> },
-    { id: 'sessions', label: 'Sessions', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'notes', label: 'Notizen', icon: <FileText className="w-4 h-4" /> },
-    { id: 'goals', label: 'Ziele', icon: <Target className="w-4 h-4" /> },
-    { id: 'privacy', label: 'Datenschutz', icon: <Shield className="w-4 h-4" /> }
-  ];
+  { id: 'overview', label: 'Übersicht', icon: <Target className="w-4 h-4" /> },
+  { id: 'sessions', label: 'Gespräche', icon: <Calendar className="w-4 h-4" /> },
+  { id: 'development', label: '🌱 Entwicklungsspuren', icon: <Target className="w-4 h-4" /> },
+  { id: 'notes', label: 'Notizen', icon: <FileText className="w-4 h-4" /> },
+  { id: 'goals', label: 'Ziele', icon: <Target className="w-4 h-4" /> },
+  { id: 'privacy', label: 'Datenschutz', icon: <Shield className="w-4 h-4" /> }
+];
 
   // DSGVO Consent Status
   const consentItems = [

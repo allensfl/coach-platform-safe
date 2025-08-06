@@ -3,6 +3,8 @@ import { useClientStore } from '../store/clientStore';
 import { Client } from '../types/client.types';
 import AddClientModal from './NewClientModal';
 
+
+
 const ClientList: React.FC = () => {
   const { clients, deleteClient, searchClients } = useClientStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -417,8 +419,35 @@ const ClientList: React.FC = () => {
                   </div>
                 </div>
               </div>
+              {/* ENTWICKLUNGSSPUREN - NEU */}
+            <div>
+              <h4 className="text-lg font-medium text-gray-900 mb-4">🌱 Entwicklungsspuren</h4>
+              <div className="bg-green-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-3">Reflexion & Entwicklungsverlauf</p>
+                <div className="space-y-2 text-sm">
+                  <div>• Erste Session: Vertrauen aufgebaut, Ziele definiert</div>
+                  <div>• Session 3: Durchbruch bei Konflikt-Thema</div>
+                  <div>• Aktuell: Arbeitet an Work-Life-Balance</div>
+                </div>
+                <button 
+  onClick={() => {
+    const newReflection = prompt("Neue Reflexion eingeben:");
+    if (newReflection) {
+      alert(`✅ REFLEXION HINZUGEFÜGT!\n\n"${newReflection}"\n\nIn der finalen Version wird das in die Datenbank gespeichert.`);
+    }
+  }}
+  className="mt-3 text-sm text-blue-600 hover:text-blue-800"
+>
+  + Reflexion hinzufügen
+</button>
+              </div>
+            </div>
             </div>
 
+            
+          
+
+          
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end mt-6">
               <button
