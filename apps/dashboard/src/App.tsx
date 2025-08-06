@@ -23,7 +23,8 @@ import NewSessionModal from './modules/session-management/components/NewSessionM
 import InvoiceBuilder from './components/invoices';
 import Analytics from './components/Analytics';
 import Settings from './components/Settings';
-
+// NEUER IMPORT für Coachee-Komponente
+import CoacheeView from './components/CoacheeView';
 type ActiveView = 'dashboard' | 'clients' | 'sessions' | 'documents' | 'invoices' | 'analytics' | 'settings' | 'tools' | 'branding';
 
 const App: React.FC = () => {
@@ -864,8 +865,13 @@ RECHNUNGSDETAILS:
         {/* Main Content */}
         <div className="pl-64">
           <main className="p-8">
-            {renderCurrentView()}
-          </main>
+  {/* COACHEE ROUTE - NEU */}
+  {window.location.pathname.startsWith('/coachee/') ? (
+    <CoacheeView />
+  ) : (
+    renderCurrentView()
+  )}
+</main>
         </div>
 
         {/* Modals */}
