@@ -249,9 +249,9 @@ RECHNUNGSDETAILS:
 
   // Navigation items
   const navigationItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: HomeIcon },
-    { id: 'clients', name: 'Klienten', icon: UserIcon },
-    { id: 'sessions', name: 'Sessions', icon: CalendarIcon },
+    { id: 'dashboard', name: 'Cockpit', icon: HomeIcon },        // Dashboard → Cockpit
+  { id: 'clients', name: 'Coachees', icon: UserIcon },        // Klienten → Coachees  
+  { id: 'sessions', name: 'Gespräche', icon: CalendarIcon },  // Sessions → Gespräche
     { id: 'documents', name: 'Dokumente', icon: DocumentTextIcon },
     { id: 'invoices', name: 'Rechnungen', icon: CurrencyDollarIcon },
     { id: 'analytics', name: 'Analytics', icon: ChartBarIcon },
@@ -367,8 +367,8 @@ RECHNUNGSDETAILS:
             {/* Dashboard Header */}
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-600 mt-2">Überblick über Ihre Coaching-Praxis</p>
+                <h1 className="text-3xl font-bold text-gray-900">Coaching Cockpit</h1>
+                <p className="text-gray-600 mt-2">Was bewegt sich in Ihrer Praxis?</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -376,14 +376,14 @@ RECHNUNGSDETAILS:
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <UserIcon className="h-4 w-4" />
-                  Neuer Klient
+                  Neuer Coachee
                 </button>
                 <button
                   onClick={() => setShowNewSessionModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   <CalendarIcon className="h-4 w-4" />
-                  Neue Session
+                  Neues Gespräch
                 </button>
               </div>
             </div>
@@ -393,7 +393,7 @@ RECHNUNGSDETAILS:
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Aktive Klienten</p>
+                    <p className="text-sm font-medium text-gray-600">Aktive Coachees</p>
                     <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
                   </div>
                   <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -405,7 +405,7 @@ RECHNUNGSDETAILS:
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Sessions Gesamt</p>
+                    <p className="text-sm font-medium text-gray-600">Gespräche Gesamt</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {clients.reduce((sum, client) => sum + client.totalSessions, 0)}
                     </p>
@@ -433,7 +433,7 @@ RECHNUNGSDETAILS:
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Ø Session-Preis</p>
+                    <p className="text-sm font-medium text-gray-600">Ø Gespräch-Honorar</p>
                     <p className="text-2xl font-bold text-gray-900">CHF 150</p>
                   </div>
                   <div className="h-12 w-12 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -445,7 +445,7 @@ RECHNUNGSDETAILS:
 
             {/* Recent Clients */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Aktuelle Klienten</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Aktuelle Coachees</h3>
               <div className="space-y-3">
                 {clients.map((client) => (
                   <div key={client.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
