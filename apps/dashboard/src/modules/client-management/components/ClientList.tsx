@@ -131,8 +131,8 @@ const ClientList: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Klienten</h1>
-          <p className="text-gray-600">{displayClients.length} von {clients.length || mockClients.length} Klienten</p>
+          <h1 className="text-2xl font-bold text-gray-900">Coachees</h1>
+          <p className="text-gray-600">{displayClients.length} von {clients.length || mockClients.length} Coachees</p>
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
@@ -150,7 +150,7 @@ const ClientList: React.FC = () => {
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Klienten suchen..."
+            placeholder="Coachees suchen..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -254,18 +254,18 @@ const ClientList: React.FC = () => {
             <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Klienten gefunden</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Coachees gefunden</h3>
             <p className="text-gray-500 mb-4">
               {searchTerm || selectedFilter !== 'all' 
                 ? 'Versuchen Sie, Ihre Suchkriterien anzupassen.'
-                : 'Fügen Sie Ihren ersten Klienten hinzu, um zu beginnen.'
+                : 'Fügen Sie Ihren ersten Coachees hinzu, um zu beginnen.'
               }
             </p>
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Ersten Klienten hinzufügen
+              Ersten Coachees hinzufügen
             </button>
           </div>
         )}
@@ -289,7 +289,7 @@ const ClientList: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Klient löschen</h3>
             <p className="text-gray-600 mb-6">
-              Sind Sie sicher, dass Sie diesen Klienten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie diesen Coachees löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </p>
             <div className="flex gap-3 justify-end">
               <button
