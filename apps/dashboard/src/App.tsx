@@ -52,8 +52,12 @@ const DEMO_COACHEES = {
   }
 };
 
-// COACHEE-VIEW KOMPONENTE
+// COACHEE-VIEW KOMPONENTE - VOLLSTÄNDIGE EXPERIENCE
 const CoacheeView = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [newNote, setNewNote] = useState('');
+  const [newGoal, setNewGoal] = useState('');
+  
   const token = window.location.pathname.split('/coachee/')[1];
   const coachee = DEMO_COACHEES[token];
   
@@ -77,65 +81,456 @@ const CoacheeView = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🌟 Willkommen, {coachee.firstName}!
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Deine persönliche Entwicklungsreise
-            </p>
-          </div>
-        </div>
+  const tabs = [
+    { id: 'overview', name: '📊 Überblick', icon: '📊' },
+    { id: 'goals', name: '🎯 Ziele', icon: '🎯' },
+    { id: 'sessions', name: '📅 Sessions', icon: '📅' },
+    { id: 'notes', name: '📝 Notizen', icon: '📝' },
+    { id: 'resources', name: '📚 Ressourcen', icon: '📚' },
+    { id: 'homework', name: '✅ Aufgaben', icon: '✅' }
+  ];
 
-        {/* Entwicklungsspuren */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            🌱 Deine Entwicklungsspuren
-          </h2>
-          
-          <div className="space-y-4">
-            {coachee.reflections.map((reflection, index) => (
-              <div 
-                key={index}
-                className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-l-4 border-green-500"
-              >
-                <p className="text-gray-800 font-medium">
-                  {reflection}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Progress Summary */}
-          <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              📈 Dein Fortschritt
-            </h3>
-            <p className="text-gray-700 text-lg">
-              {coachee.progress}
-            </p>
-          </div>
-
-          {/* Call to Action */}
-          <div className="mt-8 text-center">
-            <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                🚀 Nächste Schritte
-              </h3>
-              <p className="text-gray-700 mb-4">
-                Deine Coaching-Reise geht weiter! Bei Fragen oder für die nächste Session melde dich gerne.
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-8">
+            {/* Willkommen Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-white">
+              <h1 className="text-3xl font-bold mb-2">
+                🌟 Willkommen zurück, {coachee.firstName}!
+              </h1>
+              <p className="text-blue-100 text-lg">
+                Hier ist dein persönlicher Coaching-Bereich
               </p>
-              <div className="text-sm text-gray-500">
-                Dein persönlicher Coaching-Zugang • Vertraulich & Sicher
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">12</div>
+                  <div className="text-gray-600">Abgeschlossene Sessions</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600 mb-2">8</div>
+                  <div className="text-gray-600">Erreichte Ziele</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600 mb-2">3</div>
+                  <div className="text-gray-600">Aktive Projekte</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Entwicklungsspuren */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                🌱 Deine Entwicklungsspuren
+              </h2>
+              
+              <div className="space-y-4">
+                {coachee.reflections.map((reflection, index) => (
+                  <div 
+                    key={index}
+                    className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-l-4 border-green-500"
+                  >
+                    <p className="text-gray-800 font-medium">
+                      {reflection}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  📈 Dein Fortschritt
+                </h3>
+                <p className="text-gray-700 text-lg">
+                  {coachee.progress}
+                </p>
               </div>
             </div>
           </div>
+        );
+
+      case 'goals':
+        return (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">🎯 Deine Coaching-Ziele</h2>
+            
+            <div className="space-y-6">
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-green-900 mb-4">✅ Erreichte Ziele</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <span className="text-green-600 mr-3">✓</span>
+                    <span className="text-gray-800">Selbstvertrauen in Meetings stärken</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-green-600 mr-3">✓</span>
+                    <span className="text-gray-800">Work-Life-Balance verbessern</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-green-600 mr-3">✓</span>
+                    <span className="text-gray-800">Konfliktgespräche führen können</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-4">🔄 In Bearbeitung</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <span className="text-yellow-600 mr-3">🔄</span>
+                    <span className="text-gray-800">Teamführung optimieren</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-yellow-600 mr-3">🔄</span>
+                    <span className="text-gray-800">Delegation lernen</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">🎯 Neue Ziele</h3>
+                <div className="flex space-x-3">
+                  <input
+                    type="text"
+                    value={newGoal}
+                    onChange={(e) => setNewGoal(e.target.value)}
+                    placeholder="Neues Ziel eingeben..."
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newGoal.trim()) {
+                        alert(`Neues Ziel hinzugefügt: "${newGoal}"`);
+                        setNewGoal('');
+                      }
+                    }}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Hinzufügen
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'sessions':
+        return (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">📅 Deine Sessions</h2>
+            
+            <div className="space-y-6">
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-green-900 mb-4">📋 Nächste Session</h3>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Führungskompetenzen entwickeln</h4>
+                      <p className="text-gray-600 mt-1">🗓 Montag, 12. August 2024 um 10:00</p>
+                      <p className="text-gray-600">📍 Online-Session</p>
+                      <p className="text-gray-600">⏱ Dauer: 60 Minuten</p>
+                    </div>
+                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                      Bestätigt
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📚 Vergangene Sessions</h3>
+                <div className="space-y-4">
+                  {[
+                    { date: '5. August 2024', topic: 'Konfliktmanagement', type: 'Einzelsession', rating: '⭐⭐⭐⭐⭐' },
+                    { date: '29. Juli 2024', topic: 'Work-Life-Balance', type: 'Einzelsession', rating: '⭐⭐⭐⭐⭐' },
+                    { date: '22. Juli 2024', topic: 'Teamkommunikation', type: 'Gruppensession', rating: '⭐⭐⭐⭐' },
+                  ].map((session, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{session.topic}</h4>
+                          <p className="text-gray-600 text-sm mt-1">🗓 {session.date} • {session.type}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-600">{session.rating}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'notes':
+        return (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">📝 Persönliche Notizen</h2>
+            
+            <div className="space-y-6">
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">✍️ Neue Notiz</h3>
+                <div className="space-y-3">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="Was beschäftigt dich? Schreibe deine Gedanken auf..."
+                    className="w-full h-32 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newNote.trim()) {
+                        alert(`Notiz gespeichert: "${newNote.substring(0, 50)}..."`);
+                        setNewNote('');
+                      }
+                    }}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Notiz speichern
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Deine Notizen</h3>
+                <div className="space-y-4">
+                  {[
+                    { date: '6. August 2024', content: 'Heute hatte ich ein schwieriges Gespräch mit meinem Team. Die Techniken aus der letzten Session haben wirklich geholfen!' },
+                    { date: '3. August 2024', content: 'Reflexion: Ich merke, wie sich meine Kommunikation verbessert. Bin stolz auf den Fortschritt.' },
+                    { date: '1. August 2024', content: 'Vorbereitung für nächste Session: Möchte über Delegation sprechen. Fällt mir noch schwer loszulassen.' },
+                  ].map((note, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
+                      <div className="text-sm text-gray-500 mb-2">📅 {note.date}</div>
+                      <p className="text-gray-800">{note.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'resources':
+        return (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">📚 Deine Ressourcen</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-purple-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-purple-900 mb-4">📖 Empfohlene Bücher</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">📚</span>
+                    <div>
+                      <div className="font-medium text-gray-900">„Führen ohne Macht"</div>
+                      <div className="text-sm text-gray-600">Stefan Hagen</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">📚</span>
+                    <div>
+                      <div className="font-medium text-gray-900">„Gewaltfreie Kommunikation"</div>
+                      <div className="text-sm text-gray-600">Marshall Rosenberg</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-green-900 mb-4">🎧 Podcasts & Videos</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">🎧</span>
+                    <div>
+                      <div className="font-medium text-gray-900">Leadership Podcast</div>
+                      <div className="text-sm text-gray-600">Episode 47: Delegation</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">📺</span>
+                    <div>
+                      <div className="font-medium text-gray-900">TED Talk: Authenticity</div>
+                      <div className="text-sm text-gray-600">Brené Brown</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-4">🛠 Tools & Übungen</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">⚡</span>
+                    <div>
+                      <div className="font-medium text-gray-900">5-Minuten Meditation</div>
+                      <div className="text-sm text-gray-600">Täglich vor wichtigen Terminen</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">📊</span>
+                    <div>
+                      <div className="font-medium text-gray-900">Reflexions-Template</div>
+                      <div className="text-sm text-gray-600">Wöchentliche Selbstreflexion</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">🔗 Nützliche Links</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">🌐</span>
+                    <div>
+                      <div className="font-medium text-gray-900">Coaching-Journal Online</div>
+                      <div className="text-sm text-gray-600">Für deine täglichen Reflexionen</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">📱</span>
+                    <div>
+                      <div className="font-medium text-gray-900">Mindfulness App</div>
+                      <div className="text-sm text-gray-600">Headspace Premium-Zugang</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'homework':
+        return (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">✅ Deine Aufgaben</h2>
+            
+            <div className="space-y-6">
+              <div className="bg-red-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-red-900 mb-4">⚡ Überfällig</h3>
+                <div className="space-y-3">
+                  <div className="bg-white rounded-lg p-4 border border-red-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Führungsstil-Assessment ausfüllen</h4>
+                        <p className="text-gray-600 text-sm mt-1">Bis: 3. August 2024</p>
+                        <p className="text-gray-600 text-sm">Selbsteinschätzung deines aktuellen Führungsstils</p>
+                      </div>
+                      <button className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">
+                        Jetzt erledigen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-4">⏳ Diese Woche</h3>
+                <div className="space-y-3">
+                  <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Delegations-Gespräch führen</h4>
+                        <p className="text-gray-600 text-sm mt-1">Bis: 10. August 2024</p>
+                        <p className="text-gray-600 text-sm">Wähle eine Aufgabe aus und delegiere sie an ein Teammitglied</p>
+                      </div>
+                      <button className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700">
+                        In Bearbeitung
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Tägliche Reflexion</h4>
+                        <p className="text-gray-600 text-sm mt-1">Bis: Ende der Woche</p>
+                        <p className="text-gray-600 text-sm">5 Minuten täglich: Was lief gut? Was kann besser werden?</p>
+                      </div>
+                      <button className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700">
+                        Fortsetzen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-green-900 mb-4">✅ Erledigt</h3>
+                <div className="space-y-3">
+                  {[
+                    { task: 'Team-Meeting mit neuer Struktur', completed: '2. August 2024' },
+                    { task: 'Konfliktgespräch mit Sarah', completed: '30. Juli 2024' },
+                    { task: 'Work-Life-Balance Wochenplan', completed: '28. Juli 2024' },
+                  ].map((item, index) => (
+                    <div key={index} className="bg-white rounded-lg p-4 border border-green-200 opacity-75">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-green-600 text-lg">✓</span>
+                          <div>
+                            <h4 className="font-medium text-gray-900 line-through">{item.task}</h4>
+                            <p className="text-gray-600 text-sm">Erledigt am {item.completed}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Tab nicht gefunden</div>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      {/* Header mit Tabs */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Coaching-Portal: {coachee.firstName} {coachee.lastName}
+            </h1>
+            <div className="text-sm text-gray-500">
+              Sicherer Zugang • Vertraulich
+            </div>
+          </div>
+          
+          {/* Tab Navigation */}
+          <div className="flex space-x-1 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.name}
+              </button>
+            ))}
+          </div>
         </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {renderTabContent()}
       </div>
     </div>
   );
