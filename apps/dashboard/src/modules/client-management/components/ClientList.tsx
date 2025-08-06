@@ -449,60 +449,23 @@ const ClientList: React.FC = () => {
 
           
             {/* Action Buttons */}
-<div className="flex gap-3 justify-end mt-6">
-  <button
-    onClick={() => setShowClientDetails(false)}
-    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-  >
-    Schließen
-  </button>
-  
-  {/* TYPESCRIPT-SAFE COACHEE-LINK BUTTON */}
-<button
-  onClick={(e) => {
-    e.preventDefault();
-    
-    try {
-      // Sichere Daten-Extraktion
-      const clientName = selectedClient?.name || 'Unknown Client';
-      const clientId = selectedClient?.id || '1';
-      
-      // Token generieren
-      const safeClientName = clientName.toLowerCase()
-        .replace(/[äöüß]/g, (match) => {
-          const map: {[key: string]: string} = {'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss'};
-          return map[match] || match;
-        })
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-      
-      const coacheeToken = `${safeClientName}-${clientId}abc123`;
-      const coacheeUrl = `${window.location.origin}/coachee/${coacheeToken}`;
-      
-      // Link kopieren (falls unterstützt)
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(coacheeUrl).then(() => {
-          alert(`🔗 COACHEE-LINK GENERIERT & KOPIERT!\n\n👤 Für: ${clientName}\n🔗 Link: ${coacheeUrl}\n\n✅ Link wurde in die Zwischenablage kopiert!`);
-        }).catch(() => {
-          alert(`🔗 COACHEE-LINK GENERIERT!\n\n👤 Für: ${clientName}\n🔗 Link: ${coacheeUrl}\n\n📋 Bitte kopieren Sie den Link manuell.`);
-        });
-      } else {
-        // Fallback ohne Clipboard API
-        alert(`🔗 COACHEE-LINK GENERIERT!\n\n👤 Für: ${clientName}\n🔗 Link: ${coacheeUrl}\n\n📋 Bitte kopieren Sie den Link manuell.`);
-      }
-      
-    } catch (error) {
-      console.error('Link generation error:', error);
-      alert('❌ Fehler beim Generieren des Links. Bitte versuchen Sie es erneut.');
-    }
-  }}
-  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-  type="button"
->
-  🔗 Coachee-Link generieren
-</button>
-</div>
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={() => setShowClientDetails(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Schließen
+              </button>
+              <button
+                onClick={() => {
+                  // TODO: Navigate to edit client
+                  alert('Klient bearbeiten - Feature wird implementiert');
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Bearbeiten
+              </button>
+            </div>
           </div>
         </div>
       )}
