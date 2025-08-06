@@ -229,20 +229,30 @@ const ClientList: React.FC = () => {
                     {client.createdAt?.toLocaleDateString('de-DE') || '15.01.2024'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {/* FIXED DETAILS BUTTON */}
-                    <button
-                      onClick={() => handleClientDetails(client)}
-                      className="text-blue-600 hover:text-blue-900 transition-colors"
-                    >
-                      Details
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClient(client.id)}
-                      className="text-red-600 hover:text-red-900 transition-colors"
-                    >
-                      Löschen
-                    </button>
-                  </td>
+  <button
+    onClick={() => {
+      const token = `coachee-${client.id}-${Date.now()}`;
+      const link = `${window.location.origin}/coachee/${token}`;
+      navigator.clipboard.writeText(link);
+      alert(`✅ COACHEE-LINK KOPIERT!\n\n${link}\n\nSchicke diesen Link an deinen Coachee - er kann dann ohne Login auf seine Entwicklungsspuren zugreifen!`);
+    }}
+    className="text-green-600 hover:text-green-800 transition-colors"
+  >
+    🔗 Link
+  </button>
+  <button
+    onClick={() => handleClientDetails(client)}
+    className="text-blue-600 hover:text-blue-900 transition-colors"
+  >
+    Details
+  </button>
+  <button
+    onClick={() => handleDeleteClient(client.id)}
+    className="text-red-600 hover:text-red-900 transition-colors"
+  >
+    Löschen
+  </button>
+</td>
                 </tr>
               ))}
             </tbody>
