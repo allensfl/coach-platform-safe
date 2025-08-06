@@ -1,5 +1,15 @@
 {
   "buildCommand": "cd apps/dashboard && pnpm build",
   "outputDirectory": "apps/dashboard/dist",
-  "installCommand": "pnpm install"
+  "installCommand": "pnpm install",
+  "rewrites": [
+    {
+      "source": "/coachee/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
