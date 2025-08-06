@@ -8,9 +8,9 @@ const CoacheeView: React.FC = () => {
   // Mock coachee data based on token
   const getCoacheeData = (token: string) => {
     const coachees = {
-      'sarah-mueller-abc123': {
-        name: 'Sarah Müller',
-        profession: 'Führungskraft',
+  'sarah-muller-1abc123': {  // ← ÄNDERE VON 'sarah-mueller-abc123'
+    name: 'Sarah Müller',
+    profession: 'Führungskraft',
         coach: 'Coach MCS Team',
         topics: ['Teamführung', 'Work-Life-Balance', 'Konflikte'],
         nextSession: '2024-08-12 14:00',
@@ -41,10 +41,11 @@ const CoacheeView: React.FC = () => {
             nextSteps: 'Feedback-Gespräch mit Team-Lead führen'
           }
         ]
+        
       },
-      'michael-schmidt-def456': {
-        name: 'Michael Schmidt',
-        profession: 'Entrepreneur',
+      'michael-schmidt-2abc123': {  // ← ÄNDERE VON 'michael-schmidt-def456'
+    name: 'Michael Schmidt',
+    profession: 'Entrepreneur',
         coach: 'Coach MCS Team',
         topics: ['Unternehmensstrategie', 'Delegation', 'Stress'],
         nextSession: '2024-08-10 10:00',
@@ -59,8 +60,26 @@ const CoacheeView: React.FC = () => {
             nextSteps: 'Wöchentliche Check-ins statt tägliche Kontrolle'
           }
         ]
+      },
+  'dr-anna-weber-3abc123': {  // ← NEU HINZUFÜGEN
+    name: 'Dr. Anna Weber',
+    profession: 'Ärztin',
+    coach: 'Coach MCS Team',
+    topics: ['Work-Life-Balance', 'Burnout-Prävention', 'Karriereentwicklung'],
+    nextSession: '2024-08-14 16:00',
+    totalSessions: 6,
+    developmentNotes: [
+      {
+        date: '2024-07-20',
+        session: 6,
+        focus: 'Work-Life-Balance',
+        insights: 'Balance zwischen Patientenversorgung und Selbstfürsorge',
+        progress: 'Erste Grenzen im Arbeitsalltag gesetzt',
+        nextSteps: 'Pausen bewusst einhalten'
       }
-    };
+    ]
+  }
+};
     
     return coachees[token as keyof typeof coachees] || null;
   };
