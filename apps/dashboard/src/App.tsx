@@ -363,7 +363,7 @@ RECHNUNGSDETAILS:
     switch (activeView) {
       case 'dashboard':
         return (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {/* Dashboard Header */}
             <div className="flex justify-between items-center">
               <div>
@@ -389,15 +389,15 @@ RECHNUNGSDETAILS:
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Aktive Coachees</p>
                     <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
                   </div>
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <UserIcon className="h-6 w-6 text-blue-600" />
+                  <div className="h-12 w-12 bg-gray-50 rounded-lg flex items-center justify-center">
+                   <UserIcon className="h-6 w-6 text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -410,8 +410,8 @@ RECHNUNGSDETAILS:
                       {clients.reduce((sum, client) => sum + client.totalSessions, 0)}
                     </p>
                   </div>
-                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <CalendarIcon className="h-6 w-6 text-green-600" />
+                  <div className="h-12 w-12 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <CalendarIcon className="h-6 w-6 text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -424,8 +424,8 @@ RECHNUNGSDETAILS:
                       CHF {clients.reduce((sum, client) => sum + client.totalRevenue, 0).toLocaleString()}
                     </p>
                   </div>
-                  <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <CurrencyDollarIcon className="h-6 w-6 text-purple-600" />
+                  <div className="h-12 w-12 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <CurrencyDollarIcon className="h-6 w-6 text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -436,8 +436,8 @@ RECHNUNGSDETAILS:
                     <p className="text-sm font-medium text-gray-600">Ø Gespräch-Honorar</p>
                     <p className="text-2xl font-bold text-gray-900">CHF 150</p>
                   </div>
-                  <div className="h-12 w-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <ChartBarIcon className="h-6 w-6 text-amber-600" />
+                  <div className="h-12 w-12 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <ChartBarIcon className="h-6 w-6 text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -837,7 +837,7 @@ RECHNUNGSDETAILS:
         <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50">
           <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className="flex items-center justify-center h-16 bg-blue-600 text-white">
+            <div className="flex items-center justify-center h-16 bg-gray-800 text-white">
               <h1 className="text-xl font-bold">🚀 Coach MCS</h1>
             </div>
 
@@ -849,8 +849,8 @@ RECHNUNGSDETAILS:
                   onClick={() => setActiveView(item.id as ActiveView)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                     activeView === item.id
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
+  ? 'bg-gray-600 text-white'        // ← Dunkles Grau statt Blau
+  : 'text-gray-700 hover:bg-gray-50' // ← Bleibt gleich
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
