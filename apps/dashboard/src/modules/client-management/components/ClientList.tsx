@@ -2,7 +2,29 @@ import React, { useState } from 'react';
 import { useClientStore } from '../store/clientStore';
 import { Client } from '../types/client.types';
 import AddClientModal from './NewClientModal';
-
+// TEST-TOKENS für Demo-Betrieb
+const TEST_TOKENS = {
+  'demo-sarah-2024': {
+    firstName: 'Sarah',
+    lastName: 'Müller',
+    reflections: [
+      '✅ Session 1: Vertrauen aufgebaut, klare Ziele definiert',
+      '🚀 Session 3: Großer Durchbruch beim Konflikt-Management', 
+      '⭐ Session 5: Work-Life-Balance deutlich verbessert',
+      '🎯 Aktuell: Fokus auf Teamführung und Delegation'
+    ]
+  },
+  'demo-michael-2024': {
+    firstName: 'Michael', 
+    lastName: 'Schmidt',
+    reflections: [
+      '🎯 Session 1: Unternehmerische Vision geschärft',
+      '💡 Session 2: Neue Delegationsstrategien entwickelt',
+      '📈 Session 4: Umsatz um 40% gesteigert',
+      '🌟 Aktuell: Skalierung des Business-Modells'
+    ]
+  }
+};
 
 
 const ClientList: React.FC = () => {
@@ -229,17 +251,27 @@ const ClientList: React.FC = () => {
                     {client.createdAt?.toLocaleDateString('de-DE') || '15.01.2024'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-  <button
-    onClick={() => {
-      const token = `coachee-${client.id}-${Date.now()}`;
-      const link = `${window.location.origin}/coachee/${token}`;
-      navigator.clipboard.writeText(link);
-      alert(`✅ COACHEE-LINK KOPIERT!\n\n${link}\n\nSchicke diesen Link an deinen Coachee - er kann dann ohne Login auf seine Entwicklungsspuren zugreifen!`);
-    }}
-    className="text-green-600 hover:text-green-800 transition-colors"
-  >
-    🔗 Link
-  </button>
+
+<button
+  onClick={() => {
+    // FIXE DEMO-TOKENS verwenden statt dynamische
+    const demoLinks = [
+      'demo-sarah-2024',
+      'demo-michael-2024'
+    ];
+    
+    // Für erste beiden Coachees feste Demo-Links
+    const clientIndex = displayClients.findIndex(c => c.id === client.id);
+    const token = demoLinks[clientIndex] || demoLinks[0]; // Fallback auf ersten Link
+    
+    const link = `${window.location.origin}/coachee/${token}`;
+    navigator.clipboard.writeText(link);
+    alert(`✅ DEMO-LINK KOPIERT!\n\n${link}\n\n🎯 Funktionaler Demo-Link mit vollständiger Coachee-Experience!`);
+  }}
+  className="text-green-600 hover:text-green-800 transition-colors"
+>
+  🔗 Demo-Link
+</button>
   <button
     onClick={() => handleClientDetails(client)}
     className="text-blue-600 hover:text-blue-900 transition-colors"
