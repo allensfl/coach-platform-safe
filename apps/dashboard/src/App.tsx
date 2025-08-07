@@ -278,27 +278,31 @@ const CoacheeView = () => {
           <div className="bg-white rounded-lg shadow-lg p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">📝 Persönliche Notizen</h2>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600">Privatsphäre-Modus:</span>
-                <div className="flex items-center space-x-2">
-                  <span className={`text-sm ${!isPrivate ? 'text-gray-400' : 'text-green-600 font-medium'}`}>
-                    🔒 Nur für mich
-                  </span>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Sichtbarkeit:</span>
+                <div className="flex items-center space-x-3 bg-gray-100 rounded-lg p-1">
                   <button
-                    onClick={() => setIsPrivate(!isPrivate)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      isPrivate ? 'bg-green-600' : 'bg-gray-300'
+                    onClick={() => setIsPrivate(true)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                      isPrivate 
+                        ? 'bg-green-600 text-white shadow-md' 
+                        : 'text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        isPrivate ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
+                    <span>🔒</span>
+                    <span className="font-medium">Nur für mich</span>
                   </button>
-                  <span className={`text-sm ${isPrivate ? 'text-gray-400' : 'text-blue-600 font-medium'}`}>
-                    👥 Mit Coach teilen
-                  </span>
+                  <button
+                    onClick={() => setIsPrivate(false)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                      !isPrivate 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span>👥</span>
+                    <span className="font-medium">Mit Coach teilen</span>
+                  </button>
                 </div>
               </div>
             </div>
