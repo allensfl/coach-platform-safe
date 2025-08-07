@@ -1,4 +1,4 @@
-// App.tsx - TIER 1 ULTIMATE VERSION WITH FULLY FUNCTIONAL TOOLS SYSTEM
+// App.tsx - TIER 1 ULTIMATE VERSION WITH FIXED TOOLS CASE
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import {
@@ -1065,257 +1065,6 @@ const App: React.FC = () => {
     { id: 'settings', name: 'Einstellungen', icon: CogIcon },
   ];
 
-  // REPARIERTE TOOLS-SEKTION mit allen Funktionen
-  const renderTools = () => {
-    const [selectedCategory, setSelectedCategory] = useState('Alle');
-    const [searchTerm, setSearchTerm] = useState('');
-
-    // FUNKTIONIERENDE TOOL-VERWENDUNG
-    const handleUseToolAsFunctionName = (tool) => {
-      alert(`🛠 Tool "${tool.name}" wird geöffnet!\n\n📊 Details:\n- Typ: ${tool.type}\n- Dauer: ${tool.duration}\n- Kategorie: ${tool.category}\n\nDas Tool würde jetzt in einem neuen Fenster geöffnet werden.`);
-      
-      // Tool-Nutzung tracken
-      const updatedTools = tools.map(t => 
-        t.id === tool.id 
-          ? { ...t, usageCount: (t.usageCount || 0) + 1 }
-          : t
-      );
-      setTools(updatedTools);
-    };
-
-    // FUNKTIONSFÄHIGE KATEGORIE-FILTER
-    const categoryStats = {
-      'Zielsetzung & Visionen': tools.filter(t => t.category === 'Zielsetzung & Visionen' || t.category === 'Gesprächsführung').length,
-      'Persönlichkeitsentwicklung': tools.filter(t => t.category === 'Persönlichkeitsentwicklung').length,
-      'Kommunikation': tools.filter(t => t.category === 'Kommunikation').length,
-      'Leadership': tools.filter(t => t.category === 'Leadership').length,
-      'Stressmanagement': tools.filter(t => t.category === 'Stressmanagement').length,
-      'Lebensbalance': tools.filter(t => t.category === 'Lebensbalance').length
-    };
-
-    // GEFILTERTE TOOLS
-    const filteredTools = tools.filter(tool => {
-      const matchesCategory = selectedCategory === 'Alle' || 
-        tool.category === selectedCategory ||
-        (selectedCategory === 'Zielsetzung & Visionen' && tool.category === 'Gesprächsführung');
-      const matchesSearch = !searchTerm || 
-        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.keywords.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return matchesCategory && matchesSearch;
-    });
-
-    return (
-      <div className="p-8 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">🛠 Tools</h1>
-                <p className="text-gray-600 mt-2">Professionelle Coaching-Tools für alle Situationen</p>
-              </div>
-              <button
-                onClick={() => setShowAddToolModal(true)}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-              >
-                <span>➕</span>
-                <span>Neues Tool</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Search & Filter */}
-          <div className="mb-8 bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="🔍 Tools durchsuchen (Name, Keywords, Beschreibung)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Alle">Alle Kategorien ({tools.length})</option>
-                {Object.entries(categoryStats).map(([category, count]) => (
-                  <option key={category} value={category}>
-                    {category} ({count})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* FUNKTIONSFÄHIGE Kategorie-Übersicht */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
-            <div 
-              onClick={() => setSelectedCategory('Zielsetzung & Visionen')}
-              className="bg-blue-50 rounded-lg p-6 cursor-pointer hover:bg-blue-100 transition-colors border-l-4 border-blue-500"
-            >
-              <div className="flex items-center mb-3">
-                <span className="text-3xl mr-3">🎯</span>
-                <h3 className="text-xl font-semibold text-blue-900">Zielsetzung</h3>
-              </div>
-              <p className="text-blue-700">SMART Goals, Vision Boards</p>
-              <p className="text-sm text-blue-600 mt-2">{categoryStats['Zielsetzung & Visionen']} Tools</p>
-            </div>
-
-            <div 
-              onClick={() => setSelectedCategory('Persönlichkeitsentwicklung')}
-              className="bg-green-50 rounded-lg p-6 cursor-pointer hover:bg-green-100 transition-colors border-l-4 border-green-500"
-            >
-              <div className="flex items-center mb-3">
-                <span className="text-3xl mr-3">🧠</span>
-                <h3 className="text-xl font-semibold text-green-900">Persönlichkeit</h3>
-              </div>
-              <p className="text-green-700">Tests, Assessments, Reflexion</p>
-              <p className="text-sm text-green-600 mt-2">{categoryStats['Persönlichkeitsentwicklung']} Tools</p>
-            </div>
-
-            <div 
-              onClick={() => setSelectedCategory('Kommunikation')}
-              className="bg-purple-50 rounded-lg p-6 cursor-pointer hover:bg-purple-100 transition-colors border-l-4 border-purple-500"
-            >
-              <div className="flex items-center mb-3">
-                <span className="text-3xl mr-3">💬</span>
-                <h3 className="text-xl font-semibold text-purple-900">Kommunikation</h3>
-              </div>
-              <p className="text-purple-700">Gesprächsführung, Feedback</p>
-              <p className="text-sm text-purple-600 mt-2">{categoryStats['Kommunikation']} Tools</p>
-            </div>
-          </div>
-
-          {/* Tool Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTools.map((tool, index) => {
-              const difficultyColors = {
-                'Einfach': 'bg-green-100 text-green-800',
-                'Mittel': 'bg-yellow-100 text-yellow-800',
-                'Fortgeschritten': 'bg-red-100 text-red-800'
-              };
-
-              const categoryIcons = {
-                'Kommunikation': '💬',
-                'Stressmanagement': '🔥',
-                'Leadership': '👑',
-                'Lebensbalance': '⚖️',
-                'Persönlichkeitsentwicklung': '🧠',
-                'Zielsetzung & Visionen': '🎯',
-                'Gesprächsführung': '🎯'
-              };
-
-              return (
-                <div key={tool.id || index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center">
-                      <span className="text-2xl mr-3">{categoryIcons[tool.category] || '🛠'}</span>
-                      <span className={`px-2 py-1 rounded text-xs ${difficultyColors[tool.difficulty]}`}>
-                        {tool.difficulty}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>👁 {tool.usageCount || 0}</span>
-                    </div>
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{tool.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{tool.description}</p>
-
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>Kategorie:</span>
-                    <span className="font-medium">{tool.category}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>Typ:</span>
-                    <span className="font-medium">{tool.type}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                    <span>Dauer:</span>
-                    <span className="font-medium">{tool.duration}</span>
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleUseToolAsFunctionName(tool)}
-                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                    >
-                      Verwenden
-                    </button>
-                    <button 
-                      className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"
-                      title="Tool-Details anzeigen"
-                      onClick={() => alert(`ℹ️ Tool Details:\n\n📝 ${tool.description}\n\n🔖 Keywords: ${tool.keywords}\n👥 Zielgruppe: ${tool.targetAudience || 'Alle Coachees'}\n📅 Erstellt: ${tool.createdAt || 'Unbekannt'}`)}
-                    >
-                      ℹ️
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Empty State */}
-          {filteredTools.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <span className="text-6xl">🔍</span>
-              </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">Keine Tools gefunden</h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm ? `Keine Tools für "${searchTerm}" gefunden.` : `Keine Tools in der Kategorie "${selectedCategory}" vorhanden.`}
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('Alle');
-                }}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Filter zurücksetzen
-              </button>
-            </div>
-          )}
-
-          {/* Tool Statistics */}
-          <div className="mt-12 bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Tool-Statistiken</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{tools.length}</div>
-                <div className="text-sm text-gray-500">Gesamt Tools</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {Object.keys(categoryStats).length}
-                </div>
-                <div className="text-sm text-gray-500">Kategorien</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {tools.reduce((sum, tool) => sum + (tool.usageCount || 0), 0)}
-                </div>
-                <div className="text-sm text-gray-500">Verwendungen</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
-                  {tools.filter(t => t.difficulty === 'Fortgeschritten').length}
-                </div>
-                <div className="text-sm text-gray-500">Fortgeschritten</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const renderCurrentView = () => {
     switch (activeView) {
       case 'dashboard':
@@ -1331,7 +1080,141 @@ const App: React.FC = () => {
       case 'analytics':
         return <Analytics clients={clients} sessions={sessions} />;
       case 'tools':
-        return renderTools();
+        return (
+          <div className="space-y-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">🛠 Coaching Tools</h2>
+                <p className="text-gray-600 mt-2">Professionelle Tools und Ressourcen für erfolgreiches Coaching</p>
+              </div>
+              <button
+                onClick={() => setShowAddToolModal(true)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                + Tool hinzufügen
+              </button>
+            </div>
+
+            {/* Tool-Kategorien */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="font-semibold text-blue-900">Zielsetzung</h3>
+                <p className="text-sm text-blue-700 mt-1">SMART Goals, Vision Boards</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">🧠</div>
+                <h3 className="font-semibold text-green-900">Persönlichkeit</h3>
+                <p className="text-sm text-green-700 mt-1">Tests, Assessments, Reflexion</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">💬</div>
+                <h3 className="font-semibold text-purple-900">Kommunikation</h3>
+                <p className="text-sm text-purple-700 mt-1">Gesprächsführung, Feedback</p>
+              </div>
+            </div>
+
+            {/* Standard-Tools */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">⭐</span>
+                Verfügbare Tools
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tools.map((tool, index) => (
+                  <div key={tool.id || index} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-3xl">🛠</div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        tool.difficulty === 'Einfach' ? 'bg-green-100 text-green-800' :
+                        tool.difficulty === 'Mittel' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {tool.difficulty}
+                      </span>
+                    </div>
+                    
+                    <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
+                    <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
+                    
+                    <div className="space-y-2 text-sm mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Kategorie:</span>
+                        <span className="font-medium">{tool.category}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Typ:</span>
+                        <span className="font-medium">{tool.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Dauer:</span>
+                        <span className="font-medium">{tool.duration}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Verwendungen:</span>
+                        <span className="font-medium">{tool.usageCount}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => {
+                          alert(`🛠 Tool "${tool.name}" wird verwendet!\n\nDetails:\n- Typ: ${tool.type}\n- Dauer: ${tool.duration}\n- Kategorie: ${tool.category}`);
+                          // Nutzung erhöhen
+                          const updatedTools = tools.map(t => 
+                            t.id === tool.id ? {...t, usageCount: t.usageCount + 1} : t
+                          );
+                          setTools(updatedTools);
+                        }}
+                        className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                      >
+                        Verwenden
+                      </button>
+                      <button 
+                        onClick={() => alert(`ℹ️ Tool Details:\n\n📝 ${tool.description}\n\n🔖 Keywords: ${tool.keywords}\n📅 Erstellt: ${tool.createdAt}`)}
+                        className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        ℹ️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tool-Statistiken */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">📊</span>
+                Tool-Nutzung
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">{tools.length}</div>
+                  <div className="text-gray-600">Verfügbare Tools</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600 mb-2">
+                    {tools.reduce((sum, tool) => sum + tool.usageCount, 0)}
+                  </div>
+                  <div className="text-gray-600">Gesamte Nutzungen</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {tools.filter(t => t.difficulty === 'Einfach').length}
+                  </div>
+                  <div className="text-gray-600">Einfache Tools</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600 mb-2">
+                    {tools.filter(t => t.difficulty === 'Fortgeschritten').length}
+                  </div>
+                  <div className="text-gray-600">Fortgeschrittene</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       case 'branding':
         return (
           <div className="space-y-8">
