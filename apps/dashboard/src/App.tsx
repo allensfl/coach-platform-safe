@@ -1,4 +1,4 @@
-// App.tsx - TIER 1 ULTIMATE VERSION WITH ALL FEATURES
+// App.tsx - TIER 1 ULTIMATE VERSION WITH FULLY FUNCTIONAL TOOLS SYSTEM
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import {
@@ -620,290 +620,200 @@ const CoacheeView = () => {
   );
 };
 
-// ENHANCED ADD TOOL MODAL mit Smart-Tagging
+// REPARIERTE TOOL-UPLOAD MODAL (EnhancedAddToolModal)
 const EnhancedAddToolModal = ({ isOpen, onClose, onSubmit }) => {
-  const [toolData, setToolData] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: '',
-    keywords: [],
-    type: '',
-    difficulty: '',
-    duration: '',
-    targetAudience: [],
-    coachingPhase: [],
-    url: '',
-    file: null,
-    notes: ''
+    category: 'Zielsetzung & Visionen',
+    type: 'Assessment',
+    duration: '15-30 Min',
+    difficulty: 'Einfach',
+    keywords: '',
+    targetAudience: 'Alle Coachees'
   });
-
-  const [keywordInput, setKeywordInput] = useState('');
-  const [suggestedKeywords, setSuggestedKeywords] = useState([]);
-
-  // VORDEFINIERTE KATEGORIEN & TAGS
-  const categories = [
-    'Zielsetzung & Visionen',
-    'Persönlichkeitsentwicklung', 
-    'Kommunikation & Feedback',
-    'Führung & Management',
-    'Stressmanagement & Resilienz',
-    'Work-Life-Balance',
-    'Konfliktlösung',
-    'Teamdynamik',
-    'Karriereentwicklung',
-    'Selbstreflexion',
-    'Entscheidungsfindung',
-    'Motivation & Antrieb'
-  ];
-
-  const toolTypes = [
-    { id: 'assessment', name: '📋 Assessment/Test', desc: 'Bewertungen & Selbsteinschätzungen' },
-    { id: 'scale', name: '📊 Skala/Bewertung', desc: 'Numerische Bewertungen mit Reglern' },
-    { id: 'framework', name: '🎯 Framework/Modell', desc: 'Strukturierte Gesprächsführung' },
-    { id: 'exercise', name: '💪 Übung/Aktivität', desc: 'Praktische Aufgaben' },
-    { id: 'checklist', name: '✅ Checkliste', desc: 'Schritt-für-Schritt Listen' },
-    { id: 'template', name: '📄 Template/Vorlage', desc: 'Ausfüllbare Dokumente' },
-    { id: 'worksheet', name: '📝 Arbeitsblatt', desc: 'Strukturierte Reflexion' }
-  ];
-
-  const difficulties = ['Anfänger', 'Fortgeschritten', 'Experte'];
-  const durations = ['5-15 Min', '15-30 Min', '30-60 Min', '1-2 Stunden', '2+ Stunden'];
   
-  const targetAudiences = [
-    'Führungskräfte', 'Nachwuchstalente', 'Teammitglieder', 
-    'Unternehmer', 'Berufswechsler', 'Hochsensible Personen',
-    'Burnout-Betroffene', 'Konfliktparteien'
-  ];
+  const [errors, setErrors] = useState({});
 
-  const coachingPhases = [
-    'Kennenlernen & Rapport', 'Zieldefinition', 'Ist-Analyse',
-    'Lösungsentwicklung', 'Umsetzungsplanung', 'Erfolgsmessung',
-    'Reflexion & Lernen', 'Abschluss & Transfer'
-  ];
-
-  const generateKeywordSuggestions = (name, description, category) => {
-    const commonKeywords = {
-      'Zielsetzung & Visionen': ['ziele', 'vision', 'träume', 'zukunft', 'erfolg', 'motivation'],
-      'Kommunikation & Feedback': ['gespräch', 'feedback', 'kommunikation', 'dialog', 'zuhören'],
-      'Führung & Management': ['führung', 'team', 'delegation', 'entscheidung', 'verantwortung'],
-      'Stressmanagement & Resilienz': ['stress', 'entspannung', 'druck', 'belastung', 'ruhe'],
-      'Persönlichkeitsentwicklung': ['persönlichkeit', 'werte', 'stärken', 'potenzial', 'wachstum']
-    };
-
-    const textSuggestions = [];
-    const text = `${name} ${description}`.toLowerCase();
+  // REPARIERTE VALIDIERUNG
+  const validateForm = () => {
+    const newErrors = {};
     
-    const coachingTerms = [
-      'selbstvertrauen', 'motivation', 'ziele', 'stress', 'balance', 
-      'kommunikation', 'führung', 'team', 'konflikt', 'entscheidung',
-      'werte', 'vision', 'erfolg', 'veränderung', 'entwicklung'
-    ];
-
-    coachingTerms.forEach(term => {
-      if (text.includes(term)) {
-        textSuggestions.push(term);
-      }
-    });
-
-    const categoryKeywords = commonKeywords[category] || [];
+    if (!formData.name?.trim()) newErrors.name = 'Tool-Name ist erforderlich';
+    if (!formData.description?.trim()) newErrors.description = 'Beschreibung ist erforderlich';
+    if (!formData.keywords?.trim()) newErrors.keywords = 'Keywords sind erforderlich';
     
-    return [...new Set([...textSuggestions, ...categoryKeywords])];
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const addKeyword = (keyword) => {
-    if (keyword && !toolData.keywords.includes(keyword)) {
-      setToolData({
-        ...toolData,
-        keywords: [...toolData.keywords, keyword]
-      });
-    }
-    setKeywordInput('');
-  };
-
-  const removeKeyword = (keyword) => {
-    setToolData({
-      ...toolData,
-      keywords: toolData.keywords.filter(k => k !== keyword)
-    });
-  };
-
-  React.useEffect(() => {
-    if (toolData.name || toolData.description || toolData.category) {
-      const suggestions = generateKeywordSuggestions(
-        toolData.name, 
-        toolData.description, 
-        toolData.category
-      );
-      setSuggestedKeywords(suggestions.slice(0, 8));
-    }
-  }, [toolData.name, toolData.description, toolData.category]);
-
+  // REPARIERTER SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!toolData.name || !toolData.category || toolData.keywords.length === 0) {
-      alert('Bitte füllen Sie mindestens Name, Kategorie und Keywords aus!');
+    if (!validateForm()) {
+      alert('Bitte füllen Sie alle Pflichtfelder aus!');
       return;
     }
 
-    onSubmit({
-      ...toolData,
+    // Tool mit ID erstellen
+    const newTool = {
+      ...formData,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      searchScore: toolData.keywords.length + (toolData.description ? 1 : 0)
-    });
+      createdAt: new Date().toLocaleDateString(),
+      usageCount: 0,
+      rating: 0
+    };
+
+    onSubmit(newTool);
     
-    setToolData({
-      name: '', description: '', category: '', keywords: [],
-      type: '', difficulty: '', duration: '', targetAudience: [],
-      coachingPhase: [], url: '', file: null, notes: ''
+    // Form zurücksetzen
+    setFormData({
+      name: '',
+      description: '',
+      category: 'Zielsetzung & Visionen',
+      type: 'Assessment',
+      duration: '15-30 Min',
+      difficulty: 'Einfach',
+      keywords: '',
+      targetAudience: 'Alle Coachees'
     });
+    setErrors({});
     onClose();
+    
+    alert('✅ Tool erfolgreich hinzugefügt!');
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-8">
-          <div className="flex justify-between items-center mb-8">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">🛠 Neues Tool hinzufügen</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Tool-Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tool-Name * {errors.name && <span className="text-red-500">({errors.name})</span>}
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="z.B. GROW-Modell Template"
+            />
+          </div>
+
+          {/* Beschreibung */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Beschreibung * {errors.description && <span className="text-red-500">({errors.description})</span>}
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
+              rows="3"
+              placeholder="Kurze Beschreibung des Tools und seiner Anwendung..."
+            />
+          </div>
+
+          {/* Keywords */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Suchbegriffe/Keywords * {errors.keywords && <span className="text-red-500">({errors.keywords})</span>}
+            </label>
+            <input
+              type="text"
+              value={formData.keywords}
+              onChange={(e) => setFormData({...formData, keywords: e.target.value})}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.keywords ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="z.B. Ziele, Planung, Struktur, Probleme lösen"
+            />
+          </div>
+
+          {/* Kategorie */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hauptkategorie</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Zielsetzung & Visionen">Zielsetzung & Visionen</option>
+              <option value="Persönlichkeitsentwicklung">Persönlichkeitsentwicklung</option>
+              <option value="Kommunikation">Kommunikation</option>
+              <option value="Leadership">Leadership</option>
+              <option value="Stressmanagement">Stressmanagement</option>
+              <option value="Lebensbalance">Lebensbalance</option>
+            </select>
+          </div>
+
+          {/* Typ, Dauer, Schwierigkeit - 3 Spalten */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">🛠 Neues Tool hinzufügen</h3>
-              <p className="text-gray-600 mt-1">Je mehr Details, desto besser die Suche!</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Typ</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Assessment">Assessment</option>
+                <option value="Template">Template</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Checkliste">Checkliste</option>
+                <option value="Analyse">Analyse</option>
+              </select>
             </div>
-            <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              ✕
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tool-Name * <span className="text-xs text-gray-500">(wird bei Suche priorisiert)</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={toolData.name}
-                  onChange={(e) => setToolData({...toolData, name: e.target.value})}
-                  placeholder="z.B. GROW-Modell, Wheel of Life, Stress-Ampel"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Beschreibung * <span className="text-xs text-gray-500">(wird durchsucht)</span>
-                </label>
-                <textarea
-                  required
-                  value={toolData.description}
-                  onChange={(e) => setToolData({...toolData, description: e.target.value})}
-                  placeholder="Was macht dieses Tool? Wofür wird es eingesetzt? Welche Probleme löst es?"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hauptkategorie *
-                </label>
-                <select
-                  required
-                  value={toolData.category}
-                  onChange={(e) => setToolData({...toolData, category: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Kategorie wählen</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Dauer</label>
+              <select
+                value={formData.duration}
+                onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="5-15 Min">5-15 Min</option>
+                <option value="15-30 Min">15-30 Min</option>
+                <option value="30-45 Min">30-45 Min</option>
+                <option value="45-60 Min">45-60 Min</option>
+                <option value="60-90 Min">60-90 Min</option>
+              </select>
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Suchbegriffe/Keywords * <span className="text-xs text-gray-500">(wichtigster Teil!)</span>
-                </label>
-                
-                <div className="flex space-x-2 mb-3">
-                  <input
-                    type="text"
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword(keywordInput.toLowerCase()))}
-                    placeholder="Suchbegriff eingeben und Enter drücken"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => addKeyword(keywordInput.toLowerCase())}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="mb-4">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Aktuelle Keywords:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {toolData.keywords.map((keyword) => (
-                      <span
-                        key={keyword}
-                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center space-x-2"
-                      >
-                        <span>{keyword}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeKeyword(keyword)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {suggestedKeywords.length > 0 && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">💡 Vorgeschlagene Keywords:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {suggestedKeywords
-                        .filter(suggestion => !toolData.keywords.includes(suggestion))
-                        .map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => addKeyword(suggestion)}
-                          className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-green-100 hover:text-green-800 transition-colors"
-                        >
-                          + {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Schwierigkeit</label>
+              <select
+                value={formData.difficulty}
+                onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Einfach">Einfach</option>
+                <option value="Mittel">Mittel</option>
+                <option value="Fortgeschritten">Fortgeschritten</option>
+              </select>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 mt-8 pt-6 border-t">
+          {/* Buttons */}
+          <div className="flex space-x-4 pt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
             >
               Abbrechen
             </button>
             <button
               type="submit"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
             >
               🛠 Tool hinzufügen
             </button>
@@ -921,7 +831,80 @@ const App: React.FC = () => {
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
   const [showAddToolModal, setShowAddToolModal] = useState(false);
-  const [tools, setTools] = useState<any[]>([]);
+  const [tools, setTools] = useState<any[]>([
+    {
+      id: '1',
+      name: 'GROW-Modell Template',
+      category: 'Gesprächsführung',
+      description: 'Strukturierter Ansatz für Coaching-Gespräche mit Goal-Reality-Options-Way forward Framework',
+      keywords: 'grow, ziele, gespräch, struktur, coaching',
+      type: 'Template',
+      difficulty: 'Einfach',
+      duration: '30-60 Min',
+      usageCount: 15,
+      createdAt: '2024-07-01'
+    },
+    {
+      id: '2',
+      name: 'Wheel of Life',
+      category: 'Lebensbalance',
+      description: 'Visualisierung der Lebensbereiche zur Identifikation von Verbesserungspotenzialen',
+      keywords: 'lebensbalance, wheel, bewertung, bereiche',
+      type: 'Assessment',
+      difficulty: 'Einfach',
+      duration: '15-30 Min',
+      usageCount: 23,
+      createdAt: '2024-07-05'
+    },
+    {
+      id: '3',
+      name: 'Kommunikationsstile-Test',
+      category: 'Kommunikation',
+      description: 'Analyse der bevorzugten Kommunikationsmuster und -stile',
+      keywords: 'kommunikation, test, stil, verhalten',
+      type: 'Assessment',
+      difficulty: 'Einfach',
+      duration: '20-30 Min',
+      usageCount: 8,
+      createdAt: '2024-07-10'
+    },
+    {
+      id: '4',
+      name: 'Stressoren-Mapping',
+      category: 'Stressmanagement',
+      description: 'Identifikation und Kategorisierung von Stressquellen mit Lösungsansätzen',
+      keywords: 'stress, mapping, belastung, analyse',
+      type: 'Analyse',
+      difficulty: 'Mittel',
+      duration: '30-45 Min',
+      usageCount: 12,
+      createdAt: '2024-07-15'
+    },
+    {
+      id: '5',
+      name: 'Führungsstil-Reflexion',
+      category: 'Leadership',
+      description: 'Selbsteinschätzung des eigenen Führungsverhaltens mit 360°-Feedback-Option',
+      keywords: 'führung, reflexion, selbsteinschätzung, feedback',
+      type: 'Assessment',
+      difficulty: 'Fortgeschritten',
+      duration: '60-90 Min',
+      usageCount: 6,
+      createdAt: '2024-07-20'
+    },
+    {
+      id: '6',
+      name: 'Werte-Identifikation',
+      category: 'Persönlichkeitsentwicklung',
+      description: 'Systematische Ermittlung der persönlichen Kernwerte und Prioritäten',
+      keywords: 'werte, identifikation, prioritäten, persönlichkeit',
+      type: 'Workshop',
+      difficulty: 'Mittel',
+      duration: '45-90 Min',
+      usageCount: 18,
+      createdAt: '2024-07-25'
+    }
+  ]);
 
   const clients = [
     {
@@ -1070,10 +1053,6 @@ const App: React.FC = () => {
     setShowAddToolModal(false);
   };
 
-  const handleDeleteTool = (toolId: string) => {
-    setTools(tools.filter(tool => tool.id !== toolId));
-  };
-
   const navigationItems = [
     { id: 'dashboard', name: 'Cockpit', icon: HomeIcon },
     { id: 'clients', name: 'Coachees', icon: UserIcon },
@@ -1085,6 +1064,257 @@ const App: React.FC = () => {
     { id: 'branding', name: 'Branding', icon: PaintBrushIcon },
     { id: 'settings', name: 'Einstellungen', icon: CogIcon },
   ];
+
+  // REPARIERTE TOOLS-SEKTION mit allen Funktionen
+  const renderTools = () => {
+    const [selectedCategory, setSelectedCategory] = useState('Alle');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // FUNKTIONIERENDE TOOL-VERWENDUNG
+    const handleUseToolAsFunctionName = (tool) => {
+      alert(`🛠 Tool "${tool.name}" wird geöffnet!\n\n📊 Details:\n- Typ: ${tool.type}\n- Dauer: ${tool.duration}\n- Kategorie: ${tool.category}\n\nDas Tool würde jetzt in einem neuen Fenster geöffnet werden.`);
+      
+      // Tool-Nutzung tracken
+      const updatedTools = tools.map(t => 
+        t.id === tool.id 
+          ? { ...t, usageCount: (t.usageCount || 0) + 1 }
+          : t
+      );
+      setTools(updatedTools);
+    };
+
+    // FUNKTIONSFÄHIGE KATEGORIE-FILTER
+    const categoryStats = {
+      'Zielsetzung & Visionen': tools.filter(t => t.category === 'Zielsetzung & Visionen' || t.category === 'Gesprächsführung').length,
+      'Persönlichkeitsentwicklung': tools.filter(t => t.category === 'Persönlichkeitsentwicklung').length,
+      'Kommunikation': tools.filter(t => t.category === 'Kommunikation').length,
+      'Leadership': tools.filter(t => t.category === 'Leadership').length,
+      'Stressmanagement': tools.filter(t => t.category === 'Stressmanagement').length,
+      'Lebensbalance': tools.filter(t => t.category === 'Lebensbalance').length
+    };
+
+    // GEFILTERTE TOOLS
+    const filteredTools = tools.filter(tool => {
+      const matchesCategory = selectedCategory === 'Alle' || 
+        tool.category === selectedCategory ||
+        (selectedCategory === 'Zielsetzung & Visionen' && tool.category === 'Gesprächsführung');
+      const matchesSearch = !searchTerm || 
+        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tool.keywords.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tool.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesCategory && matchesSearch;
+    });
+
+    return (
+      <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">🛠 Tools</h1>
+                <p className="text-gray-600 mt-2">Professionelle Coaching-Tools für alle Situationen</p>
+              </div>
+              <button
+                onClick={() => setShowAddToolModal(true)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+              >
+                <span>➕</span>
+                <span>Neues Tool</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="mb-8 bg-white rounded-lg p-6 shadow-sm">
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="🔍 Tools durchsuchen (Name, Keywords, Beschreibung)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Alle">Alle Kategorien ({tools.length})</option>
+                {Object.entries(categoryStats).map(([category, count]) => (
+                  <option key={category} value={category}>
+                    {category} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* FUNKTIONSFÄHIGE Kategorie-Übersicht */}
+          <div className="mb-8 grid grid-cols-3 gap-6">
+            <div 
+              onClick={() => setSelectedCategory('Zielsetzung & Visionen')}
+              className="bg-blue-50 rounded-lg p-6 cursor-pointer hover:bg-blue-100 transition-colors border-l-4 border-blue-500"
+            >
+              <div className="flex items-center mb-3">
+                <span className="text-3xl mr-3">🎯</span>
+                <h3 className="text-xl font-semibold text-blue-900">Zielsetzung</h3>
+              </div>
+              <p className="text-blue-700">SMART Goals, Vision Boards</p>
+              <p className="text-sm text-blue-600 mt-2">{categoryStats['Zielsetzung & Visionen']} Tools</p>
+            </div>
+
+            <div 
+              onClick={() => setSelectedCategory('Persönlichkeitsentwicklung')}
+              className="bg-green-50 rounded-lg p-6 cursor-pointer hover:bg-green-100 transition-colors border-l-4 border-green-500"
+            >
+              <div className="flex items-center mb-3">
+                <span className="text-3xl mr-3">🧠</span>
+                <h3 className="text-xl font-semibold text-green-900">Persönlichkeit</h3>
+              </div>
+              <p className="text-green-700">Tests, Assessments, Reflexion</p>
+              <p className="text-sm text-green-600 mt-2">{categoryStats['Persönlichkeitsentwicklung']} Tools</p>
+            </div>
+
+            <div 
+              onClick={() => setSelectedCategory('Kommunikation')}
+              className="bg-purple-50 rounded-lg p-6 cursor-pointer hover:bg-purple-100 transition-colors border-l-4 border-purple-500"
+            >
+              <div className="flex items-center mb-3">
+                <span className="text-3xl mr-3">💬</span>
+                <h3 className="text-xl font-semibold text-purple-900">Kommunikation</h3>
+              </div>
+              <p className="text-purple-700">Gesprächsführung, Feedback</p>
+              <p className="text-sm text-purple-600 mt-2">{categoryStats['Kommunikation']} Tools</p>
+            </div>
+          </div>
+
+          {/* Tool Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTools.map((tool, index) => {
+              const difficultyColors = {
+                'Einfach': 'bg-green-100 text-green-800',
+                'Mittel': 'bg-yellow-100 text-yellow-800',
+                'Fortgeschritten': 'bg-red-100 text-red-800'
+              };
+
+              const categoryIcons = {
+                'Kommunikation': '💬',
+                'Stressmanagement': '🔥',
+                'Leadership': '👑',
+                'Lebensbalance': '⚖️',
+                'Persönlichkeitsentwicklung': '🧠',
+                'Zielsetzung & Visionen': '🎯',
+                'Gesprächsführung': '🎯'
+              };
+
+              return (
+                <div key={tool.id || index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center">
+                      <span className="text-2xl mr-3">{categoryIcons[tool.category] || '🛠'}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${difficultyColors[tool.difficulty]}`}>
+                        {tool.difficulty}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <span>👁 {tool.usageCount || 0}</span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{tool.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{tool.description}</p>
+
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span>Kategorie:</span>
+                    <span className="font-medium">{tool.category}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span>Typ:</span>
+                    <span className="font-medium">{tool.type}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
+                    <span>Dauer:</span>
+                    <span className="font-medium">{tool.duration}</span>
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleUseToolAsFunctionName(tool)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                      Verwenden
+                    </button>
+                    <button 
+                      className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"
+                      title="Tool-Details anzeigen"
+                      onClick={() => alert(`ℹ️ Tool Details:\n\n📝 ${tool.description}\n\n🔖 Keywords: ${tool.keywords}\n👥 Zielgruppe: ${tool.targetAudience || 'Alle Coachees'}\n📅 Erstellt: ${tool.createdAt || 'Unbekannt'}`)}
+                    >
+                      ℹ️
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Empty State */}
+          {filteredTools.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <span className="text-6xl">🔍</span>
+              </div>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">Keine Tools gefunden</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm ? `Keine Tools für "${searchTerm}" gefunden.` : `Keine Tools in der Kategorie "${selectedCategory}" vorhanden.`}
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('Alle');
+                }}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Filter zurücksetzen
+              </button>
+            </div>
+          )}
+
+          {/* Tool Statistics */}
+          <div className="mt-12 bg-white rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Tool-Statistiken</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{tools.length}</div>
+                <div className="text-sm text-gray-500">Gesamt Tools</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {Object.keys(categoryStats).length}
+                </div>
+                <div className="text-sm text-gray-500">Kategorien</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {tools.reduce((sum, tool) => sum + (tool.usageCount || 0), 0)}
+                </div>
+                <div className="text-sm text-gray-500">Verwendungen</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  {tools.filter(t => t.difficulty === 'Fortgeschritten').length}
+                </div>
+                <div className="text-sm text-gray-500">Fortgeschritten</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderCurrentView = () => {
     switch (activeView) {
@@ -1101,229 +1331,7 @@ const App: React.FC = () => {
       case 'analytics':
         return <Analytics clients={clients} sessions={sessions} />;
       case 'tools':
-        return (
-          <div className="space-y-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">🛠 Coaching Tools</h2>
-                <p className="text-gray-600 mt-2">Professionelle Tools und Ressourcen für erfolgreiches Coaching</p>
-              </div>
-              <button
-                onClick={() => setShowAddToolModal(true)}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                + Tool hinzufügen
-              </button>
-            </div>
-
-            {/* Tool-Kategorien */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="font-semibold text-blue-900">Zielsetzung</h3>
-                <p className="text-sm text-blue-700 mt-1">SMART Goals, Vision Boards</p>
-              </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">🧠</div>
-                <h3 className="font-semibold text-green-900">Persönlichkeit</h3>
-                <p className="text-sm text-green-700 mt-1">Tests, Assessments, Reflexion</p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">💬</div>
-                <h3 className="font-semibold text-purple-900">Kommunikation</h3>
-                <p className="text-sm text-purple-700 mt-1">Gesprächsführung, Feedback</p>
-              </div>
-            </div>
-
-            {/* Standard-Tools */}
-            <div className="bg-white rounded-lg shadow p-8">
-              <h3 className="text-xl font-semibold mb-6 flex items-center">
-                <span className="mr-3">⭐</span>
-                Empfohlene Standard-Tools
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    name: "GROW-Modell Template",
-                    category: "Gesprächsführung",
-                    description: "Strukturierter Ansatz für Coaching-Gespräche mit Goal-Reality-Options-Way forward Framework",
-                    icon: "🎯",
-                    type: "Template",
-                    difficulty: "Einfach",
-                    duration: "30-60 Min"
-                  },
-                  {
-                    name: "Wheel of Life",
-                    category: "Lebensbalance",
-                    description: "Visualisierung der Lebensbereiche zur Identifikation von Verbesserungspotenzialen",
-                    icon: "⭕",
-                    type: "Assessment",
-                    difficulty: "Einfach",
-                    duration: "15-30 Min"
-                  },
-                  {
-                    name: "Werte-Identifikation",
-                    category: "Persönlichkeitsentwicklung",
-                    description: "Systematische Ermittlung der persönlichen Kernwerte und Prioritäten",
-                    icon: "💎",
-                    type: "Workshop",
-                    difficulty: "Mittel",
-                    duration: "45-90 Min"
-                  },
-                  {
-                    name: "Kommunikationsstile-Test",
-                    category: "Kommunikation",
-                    description: "Analyse der bevorzugten Kommunikationsmuster und -stile",
-                    icon: "💬",
-                    type: "Assessment",
-                    difficulty: "Einfach",
-                    duration: "20-30 Min"
-                  },
-                  {
-                    name: "Stressoren-Mapping",
-                    category: "Stressmanagement",
-                    description: "Identifikation und Kategorisierung von Stressquellen mit Lösungsansätzen",
-                    icon: "🔥",
-                    type: "Analyse",
-                    difficulty: "Mittel",
-                    duration: "30-45 Min"
-                  },
-                  {
-                    name: "Führungsstil-Reflexion",
-                    category: "Leadership",
-                    description: "Selbsteinschätzung des eigenen Führungsverhaltens mit 360°-Feedback-Option",
-                    icon: "👑",
-                    type: "Assessment",
-                    difficulty: "Fortgeschritten",
-                    duration: "60-90 Min"
-                  }
-                ].map((tool, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="text-3xl">{tool.icon}</div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        tool.difficulty === 'Einfach' ? 'bg-green-100 text-green-800' :
-                        tool.difficulty === 'Mittel' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {tool.difficulty}
-                      </span>
-                    </div>
-                    
-                    <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
-                    <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Kategorie:</span>
-                        <span className="font-medium">{tool.category}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Typ:</span>
-                        <span className="font-medium">{tool.type}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Dauer:</span>
-                        <span className="font-medium">{tool.duration}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex space-x-2 mt-4">
-                      <button className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors">
-                        Verwenden
-                      </button>
-                      <button className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">
-                        ℹ️
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Eigene Tools */}
-            <div className="bg-white rounded-lg shadow p-8">
-              <h3 className="text-xl font-semibold mb-6 flex items-center">
-                <span className="mr-3">🔧</span>
-                Meine eigenen Tools
-              </h3>
-              
-              {tools.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🛠</div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Noch keine eigenen Tools</h4>
-                  <p className="text-gray-600 mb-6">Fügen Sie Ihre bewährten Coaching-Tools hinzu</p>
-                  <button
-                    onClick={() => setShowAddToolModal(true)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Erstes Tool hinzufügen
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tools.map((tool) => (
-                    <div key={tool.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="text-3xl">🔧</div>
-                        <button
-                          onClick={() => handleDeleteTool(tool.id)}
-                          className="text-red-600 hover:text-red-800 text-sm p-1"
-                        >
-                          🗑
-                        </button>
-                      </div>
-                      
-                      <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
-                      <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
-                      
-                      <span className="inline-block px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full mb-4">
-                        {tool.category}
-                      </span>
-                      
-                      {tool.url && (
-                        <a
-                          href={tool.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-full text-center bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
-                        >
-                          Tool öffnen →
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Tool-Statistiken */}
-            <div className="bg-white rounded-lg shadow p-8">
-              <h3 className="text-xl font-semibold mb-6 flex items-center">
-                <span className="mr-3">📊</span>
-                Tool-Nutzung
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">{tools.length + 6}</div>
-                  <div className="text-gray-600">Verfügbare Tools</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">24</div>
-                  <div className="text-gray-600">Nutzungen diese Woche</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">8</div>
-                  <div className="text-gray-600">Favoriten</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">15</div>
-                  <div className="text-gray-600">Kategorien</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return renderTools();
       case 'branding':
         return (
           <div className="space-y-8">
