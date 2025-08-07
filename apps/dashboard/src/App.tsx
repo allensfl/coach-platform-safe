@@ -1684,7 +1684,7 @@ const App: React.FC = () => {
                     </h2>
                   </div>
                   <div className="flex items-center space-x-4">
-                    {(activeView === 'clients' || activeView === 'dashboard') && (
+                    {activeView === 'dashboard' && (
                       <button
                         onClick={() => setShowNewClientModal(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
