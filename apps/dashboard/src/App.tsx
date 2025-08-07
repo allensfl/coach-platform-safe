@@ -1,4 +1,4 @@
-// App.tsx - TIER 1 ULTIMATE VERSION WITH COMPLETE FUNCTIONALITY
+// App.tsx - TIER 1 ULTIMATE VERSION WITH ALL FEATURES
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import {
@@ -57,6 +57,7 @@ const CoacheeView = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [newNote, setNewNote] = useState('');
   const [newGoal, setNewGoal] = useState('');
+  const [isPrivate, setIsPrivate] = useState(true);
   
   const token = window.location.pathname.split('/coachee/')[1];
   const coachee = DEMO_COACHEES[token];
@@ -275,45 +276,124 @@ const CoacheeView = () => {
       case 'notes':
         return (
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">📝 Persönliche Notizen</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">📝 Persönliche Notizen</h2>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">Privatsphäre-Modus:</span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm ${!isPrivate ? 'text-gray-400' : 'text-green-600 font-medium'}`}>
+                    🔒 Nur für mich
+                  </span>
+                  <button
+                    onClick={() => setIsPrivate(!isPrivate)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      isPrivate ? 'bg-green-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isPrivate ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <span className={`text-sm ${isPrivate ? 'text-gray-400' : 'text-blue-600 font-medium'}`}>
+                    👥 Mit Coach teilen
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Privatsphäre Info */}
+            <div className={`mb-6 p-4 rounded-lg ${isPrivate ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
+              <div className="flex items-start space-x-3">
+                <span className="text-lg">{isPrivate ? '🔒' : '👥'}</span>
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-1">
+                    {isPrivate ? 'Private Notizen' : 'Geteilte Notizen'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {isPrivate 
+                      ? 'Diese Notizen sind nur für dich sichtbar und werden nicht mit deinem Coach geteilt.'
+                      : 'Diese Notizen können von deinem Coach eingesehen werden, um dich besser zu unterstützen.'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
             
             <div className="space-y-6">
-              <div className="bg-blue-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-blue-900 mb-4">✍️ Neue Notiz</h3>
+              <div className={`rounded-lg p-6 ${isPrivate ? 'bg-green-50' : 'bg-blue-50'}`}>
+                <h3 className={`text-lg font-semibold mb-4 ${isPrivate ? 'text-green-900' : 'text-blue-900'}`}>
+                  ✍️ Neue Notiz
+                </h3>
                 <div className="space-y-3">
                   <textarea
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
-                    placeholder="Was beschäftigt dich? Schreibe deine Gedanken auf..."
+                    placeholder={isPrivate 
+                      ? "Deine privaten Gedanken und Reflexionen..." 
+                      : "Notiz, die du mit deinem Coach teilen möchtest..."
+                    }
                     className="w-full h-32 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
-                  <button
-                    onClick={() => {
-                      if (newNote.trim()) {
-                        alert(`Notiz gespeichert: "${newNote.substring(0, 50)}..."`);
-                        setNewNote('');
-                      }
-                    }}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Notiz speichern
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <span>{isPrivate ? '🔒' : '👥'}</span>
+                      <span>{isPrivate ? 'Wird privat gespeichert' : 'Wird mit Coach geteilt'}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (newNote.trim()) {
+                          alert(`${isPrivate ? 'Private' : 'Geteilte'} Notiz gespeichert: "${newNote.substring(0, 50)}..."`);
+                          setNewNote('');
+                        }
+                      }}
+                      className={`px-6 py-2 rounded-lg transition-colors text-white ${
+                        isPrivate 
+                          ? 'bg-green-600 hover:bg-green-700' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                    >
+                      Notiz speichern
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Deine Notizen</h3>
                 <div className="space-y-4">
-                  {[
-                    { date: '6. August 2024', content: 'Heute hatte ich ein schwieriges Gespräch mit meinem Team. Die Techniken aus der letzten Session haben wirklich geholfen!' },
-                    { date: '3. August 2024', content: 'Reflexion: Ich merke, wie sich meine Kommunikation verbessert. Bin stolz auf den Fortschritt.' },
-                    { date: '1. August 2024', content: 'Vorbereitung für nächste Session: Möchte über Delegation sprechen. Fällt mir noch schwer loszulassen.' },
-                  ].map((note, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
-                      <div className="text-sm text-gray-500 mb-2">📅 {note.date}</div>
-                      <p className="text-gray-800">{note.content}</p>
+                  {/* Private Notizen */}
+                  <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <span className="mr-2">🔒</span>
+                        📅 6. August 2024 • Privat
+                      </div>
                     </div>
-                  ))}
+                    <p className="text-gray-800">Heute hatte ich ein schwieriges Gespräch mit meinem Team. Bin mir noch unsicher, ob ich alles richtig gemacht habe. Möchte das erstmal für mich behalten und reflektieren.</p>
+                  </div>
+                  
+                  {/* Geteilte Notizen */}
+                  <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <span className="mr-2">👥</span>
+                        📅 3. August 2024 • Mit Coach geteilt
+                      </div>
+                    </div>
+                    <p className="text-gray-800">Die Techniken aus der letzten Session haben wirklich geholfen! Möchte in der nächsten Session über weitere Kommunikationsstrategien sprechen.</p>
+                  </div>
+
+                  <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <span className="mr-2">🔒</span>
+                        📅 1. August 2024 • Privat
+                      </div>
+                    </div>
+                    <p className="text-gray-800">Manchmal fühle ich mich überfordert. Gut zu wissen, dass ich einen sicheren Raum habe, um das zu reflektieren, ohne dass jemand anders es lesen muss.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -536,6 +616,300 @@ const CoacheeView = () => {
   );
 };
 
+// ENHANCED ADD TOOL MODAL mit Smart-Tagging
+const EnhancedAddToolModal = ({ isOpen, onClose, onSubmit }) => {
+  const [toolData, setToolData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    keywords: [],
+    type: '',
+    difficulty: '',
+    duration: '',
+    targetAudience: [],
+    coachingPhase: [],
+    url: '',
+    file: null,
+    notes: ''
+  });
+
+  const [keywordInput, setKeywordInput] = useState('');
+  const [suggestedKeywords, setSuggestedKeywords] = useState([]);
+
+  // VORDEFINIERTE KATEGORIEN & TAGS
+  const categories = [
+    'Zielsetzung & Visionen',
+    'Persönlichkeitsentwicklung', 
+    'Kommunikation & Feedback',
+    'Führung & Management',
+    'Stressmanagement & Resilienz',
+    'Work-Life-Balance',
+    'Konfliktlösung',
+    'Teamdynamik',
+    'Karriereentwicklung',
+    'Selbstreflexion',
+    'Entscheidungsfindung',
+    'Motivation & Antrieb'
+  ];
+
+  const toolTypes = [
+    { id: 'assessment', name: '📋 Assessment/Test', desc: 'Bewertungen & Selbsteinschätzungen' },
+    { id: 'scale', name: '📊 Skala/Bewertung', desc: 'Numerische Bewertungen mit Reglern' },
+    { id: 'framework', name: '🎯 Framework/Modell', desc: 'Strukturierte Gesprächsführung' },
+    { id: 'exercise', name: '💪 Übung/Aktivität', desc: 'Praktische Aufgaben' },
+    { id: 'checklist', name: '✅ Checkliste', desc: 'Schritt-für-Schritt Listen' },
+    { id: 'template', name: '📄 Template/Vorlage', desc: 'Ausfüllbare Dokumente' },
+    { id: 'worksheet', name: '📝 Arbeitsblatt', desc: 'Strukturierte Reflexion' }
+  ];
+
+  const difficulties = ['Anfänger', 'Fortgeschritten', 'Experte'];
+  const durations = ['5-15 Min', '15-30 Min', '30-60 Min', '1-2 Stunden', '2+ Stunden'];
+  
+  const targetAudiences = [
+    'Führungskräfte', 'Nachwuchstalente', 'Teammitglieder', 
+    'Unternehmer', 'Berufswechsler', 'Hochsensible Personen',
+    'Burnout-Betroffene', 'Konfliktparteien'
+  ];
+
+  const coachingPhases = [
+    'Kennenlernen & Rapport', 'Zieldefinition', 'Ist-Analyse',
+    'Lösungsentwicklung', 'Umsetzungsplanung', 'Erfolgsmessung',
+    'Reflexion & Lernen', 'Abschluss & Transfer'
+  ];
+
+  const generateKeywordSuggestions = (name, description, category) => {
+    const commonKeywords = {
+      'Zielsetzung & Visionen': ['ziele', 'vision', 'träume', 'zukunft', 'erfolg', 'motivation'],
+      'Kommunikation & Feedback': ['gespräch', 'feedback', 'kommunikation', 'dialog', 'zuhören'],
+      'Führung & Management': ['führung', 'team', 'delegation', 'entscheidung', 'verantwortung'],
+      'Stressmanagement & Resilienz': ['stress', 'entspannung', 'druck', 'belastung', 'ruhe'],
+      'Persönlichkeitsentwicklung': ['persönlichkeit', 'werte', 'stärken', 'potenzial', 'wachstum']
+    };
+
+    const textSuggestions = [];
+    const text = `${name} ${description}`.toLowerCase();
+    
+    const coachingTerms = [
+      'selbstvertrauen', 'motivation', 'ziele', 'stress', 'balance', 
+      'kommunikation', 'führung', 'team', 'konflikt', 'entscheidung',
+      'werte', 'vision', 'erfolg', 'veränderung', 'entwicklung'
+    ];
+
+    coachingTerms.forEach(term => {
+      if (text.includes(term)) {
+        textSuggestions.push(term);
+      }
+    });
+
+    const categoryKeywords = commonKeywords[category] || [];
+    
+    return [...new Set([...textSuggestions, ...categoryKeywords])];
+  };
+
+  const addKeyword = (keyword) => {
+    if (keyword && !toolData.keywords.includes(keyword)) {
+      setToolData({
+        ...toolData,
+        keywords: [...toolData.keywords, keyword]
+      });
+    }
+    setKeywordInput('');
+  };
+
+  const removeKeyword = (keyword) => {
+    setToolData({
+      ...toolData,
+      keywords: toolData.keywords.filter(k => k !== keyword)
+    });
+  };
+
+  React.useEffect(() => {
+    if (toolData.name || toolData.description || toolData.category) {
+      const suggestions = generateKeywordSuggestions(
+        toolData.name, 
+        toolData.description, 
+        toolData.category
+      );
+      setSuggestedKeywords(suggestions.slice(0, 8));
+    }
+  }, [toolData.name, toolData.description, toolData.category]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!toolData.name || !toolData.category || toolData.keywords.length === 0) {
+      alert('Bitte füllen Sie mindestens Name, Kategorie und Keywords aus!');
+      return;
+    }
+
+    onSubmit({
+      ...toolData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      searchScore: toolData.keywords.length + (toolData.description ? 1 : 0)
+    });
+    
+    setToolData({
+      name: '', description: '', category: '', keywords: [],
+      type: '', difficulty: '', duration: '', targetAudience: [],
+      coachingPhase: [], url: '', file: null, notes: ''
+    });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">🛠 Neues Tool hinzufügen</h3>
+              <p className="text-gray-600 mt-1">Je mehr Details, desto besser die Suche!</p>
+            </div>
+            <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
+              ✕
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tool-Name * <span className="text-xs text-gray-500">(wird bei Suche priorisiert)</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={toolData.name}
+                  onChange={(e) => setToolData({...toolData, name: e.target.value})}
+                  placeholder="z.B. GROW-Modell, Wheel of Life, Stress-Ampel"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Beschreibung * <span className="text-xs text-gray-500">(wird durchsucht)</span>
+                </label>
+                <textarea
+                  required
+                  value={toolData.description}
+                  onChange={(e) => setToolData({...toolData, description: e.target.value})}
+                  placeholder="Was macht dieses Tool? Wofür wird es eingesetzt? Welche Probleme löst es?"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hauptkategorie *
+                </label>
+                <select
+                  required
+                  value={toolData.category}
+                  onChange={(e) => setToolData({...toolData, category: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Kategorie wählen</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Suchbegriffe/Keywords * <span className="text-xs text-gray-500">(wichtigster Teil!)</span>
+                </label>
+                
+                <div className="flex space-x-2 mb-3">
+                  <input
+                    type="text"
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword(keywordInput.toLowerCase()))}
+                    placeholder="Suchbegriff eingeben und Enter drücken"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => addKeyword(keywordInput.toLowerCase())}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-sm font-medium text-gray-700 mb-2">Aktuelle Keywords:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {toolData.keywords.map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center space-x-2"
+                      >
+                        <span>{keyword}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeKeyword(keyword)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {suggestedKeywords.length > 0 && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">💡 Vorgeschlagene Keywords:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestedKeywords
+                        .filter(suggestion => !toolData.keywords.includes(suggestion))
+                        .map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => addKeyword(suggestion)}
+                          className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-green-100 hover:text-green-800 transition-colors"
+                        >
+                          + {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4 mt-8 pt-6 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              🛠 Tool hinzufügen
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 type ActiveView = 'dashboard' | 'clients' | 'sessions' | 'documents' | 'invoices' | 'analytics' | 'settings' | 'tools' | 'branding';
 
 const App: React.FC = () => {
@@ -545,7 +919,6 @@ const App: React.FC = () => {
   const [showAddToolModal, setShowAddToolModal] = useState(false);
   const [tools, setTools] = useState<any[]>([]);
 
-  // Mock clients data - same as your real data
   const clients = [
     {
       id: '1',
@@ -698,9 +1071,9 @@ const App: React.FC = () => {
   };
 
   const navigationItems = [
-    { id: 'dashboard', name: 'Cockpit', icon: HomeIcon },        // Dashboard → Cockpit
-    { id: 'clients', name: 'Coachees', icon: UserIcon },        // Klienten → Coachees
-    { id: 'sessions', name: 'Gespräche', icon: CalendarIcon },  // Sessions → Gespräche
+    { id: 'dashboard', name: 'Cockpit', icon: HomeIcon },
+    { id: 'clients', name: 'Coachees', icon: UserIcon },
+    { id: 'sessions', name: 'Gespräche', icon: CalendarIcon },
     { id: 'documents', name: 'Dokumente', icon: DocumentTextIcon },
     { id: 'invoices', name: 'Rechnungen', icon: CurrencyDollarIcon },
     { id: 'analytics', name: 'Analytics', icon: ChartBarIcon },
@@ -725,88 +1098,501 @@ const App: React.FC = () => {
         return <Analytics clients={clients} sessions={sessions} />;
       case 'tools':
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Coaching Tools</h2>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">🛠 Coaching Tools</h2>
+                <p className="text-gray-600 mt-2">Professionelle Tools und Ressourcen für erfolgreiches Coaching</p>
+              </div>
               <button
                 onClick={() => setShowAddToolModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 + Tool hinzufügen
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tools.map((tool) => (
-                <div key={tool.id} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{tool.name}</h3>
-                      <p className="text-gray-600 mt-1">{tool.description}</p>
-                      <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded mt-2">
-                        {tool.category}
+
+            {/* Tool-Kategorien */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="font-semibold text-blue-900">Zielsetzung</h3>
+                <p className="text-sm text-blue-700 mt-1">SMART Goals, Vision Boards</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">🧠</div>
+                <h3 className="font-semibold text-green-900">Persönlichkeit</h3>
+                <p className="text-sm text-green-700 mt-1">Tests, Assessments, Reflexion</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">💬</div>
+                <h3 className="font-semibold text-purple-900">Kommunikation</h3>
+                <p className="text-sm text-purple-700 mt-1">Gesprächsführung, Feedback</p>
+              </div>
+            </div>
+
+            {/* Standard-Tools */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">⭐</span>
+                Empfohlene Standard-Tools
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  {
+                    name: "GROW-Modell Template",
+                    category: "Gesprächsführung",
+                    description: "Strukturierter Ansatz für Coaching-Gespräche mit Goal-Reality-Options-Way forward Framework",
+                    icon: "🎯",
+                    type: "Template",
+                    difficulty: "Einfach",
+                    duration: "30-60 Min"
+                  },
+                  {
+                    name: "Wheel of Life",
+                    category: "Lebensbalance",
+                    description: "Visualisierung der Lebensbereiche zur Identifikation von Verbesserungspotenzialen",
+                    icon: "⭕",
+                    type: "Assessment",
+                    difficulty: "Einfach",
+                    duration: "15-30 Min"
+                  },
+                  {
+                    name: "Werte-Identifikation",
+                    category: "Persönlichkeitsentwicklung",
+                    description: "Systematische Ermittlung der persönlichen Kernwerte und Prioritäten",
+                    icon: "💎",
+                    type: "Workshop",
+                    difficulty: "Mittel",
+                    duration: "45-90 Min"
+                  },
+                  {
+                    name: "Kommunikationsstile-Test",
+                    category: "Kommunikation",
+                    description: "Analyse der bevorzugten Kommunikationsmuster und -stile",
+                    icon: "💬",
+                    type: "Assessment",
+                    difficulty: "Einfach",
+                    duration: "20-30 Min"
+                  },
+                  {
+                    name: "Stressoren-Mapping",
+                    category: "Stressmanagement",
+                    description: "Identifikation und Kategorisierung von Stressquellen mit Lösungsansätzen",
+                    icon: "🔥",
+                    type: "Analyse",
+                    difficulty: "Mittel",
+                    duration: "30-45 Min"
+                  },
+                  {
+                    name: "Führungsstil-Reflexion",
+                    category: "Leadership",
+                    description: "Selbsteinschätzung des eigenen Führungsverhaltens mit 360°-Feedback-Option",
+                    icon: "👑",
+                    type: "Assessment",
+                    difficulty: "Fortgeschritten",
+                    duration: "60-90 Min"
+                  }
+                ].map((tool, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-3xl">{tool.icon}</div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        tool.difficulty === 'Einfach' ? 'bg-green-100 text-green-800' :
+                        tool.difficulty === 'Mittel' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {tool.difficulty}
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleDeleteTool(tool.id)}
-                      className="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      Löschen
-                    </button>
+                    
+                    <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
+                    <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Kategorie:</span>
+                        <span className="font-medium">{tool.category}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Typ:</span>
+                        <span className="font-medium">{tool.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Dauer:</span>
+                        <span className="font-medium">{tool.duration}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-2 mt-4">
+                      <button className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors">
+                        Verwenden
+                      </button>
+                      <button className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">
+                        ℹ️
+                      </button>
+                    </div>
                   </div>
-                  {tool.url && (
-                    <a
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      Tool öffnen →
-                    </a>
-                  )}
+                ))}
+              </div>
+            </div>
+
+            {/* Eigene Tools */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">🔧</span>
+                Meine eigenen Tools
+              </h3>
+              
+              {tools.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🛠</div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Noch keine eigenen Tools</h4>
+                  <p className="text-gray-600 mb-6">Fügen Sie Ihre bewährten Coaching-Tools hinzu</p>
+                  <button
+                    onClick={() => setShowAddToolModal(true)}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Erstes Tool hinzufügen
+                  </button>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tools.map((tool) => (
+                    <div key={tool.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="text-3xl">🔧</div>
+                        <button
+                          onClick={() => handleDeleteTool(tool.id)}
+                          className="text-red-600 hover:text-red-800 text-sm p-1"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                      
+                      <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
+                      <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
+                      
+                      <span className="inline-block px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full mb-4">
+                        {tool.category}
+                      </span>
+                      
+                      {tool.url && (
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
+                        >
+                          Tool öffnen →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Tool-Statistiken */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">📊</span>
+                Tool-Nutzung
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">{tools.length + 6}</div>
+                  <div className="text-gray-600">Verfügbare Tools</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600 mb-2">24</div>
+                  <div className="text-gray-600">Nutzungen diese Woche</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600 mb-2">8</div>
+                  <div className="text-gray-600">Favoriten</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600 mb-2">15</div>
+                  <div className="text-gray-600">Kategorien</div>
+                </div>
+              </div>
             </div>
           </div>
         );
       case 'branding':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Branding & Design</h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4">Logo & Corporate Identity</h3>
-              <div className="space-y-4">
+          <div className="space-y-8">
+            <h2 className="text-3xl font-bold text-gray-900">🎨 Branding & Corporate Identity</h2>
+            
+            {/* Logo & Identity */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">🏢</span>
+                Logo & Corporate Identity
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Firmenlogo hochladen
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Logo wird im Dashboard-Header angezeigt</p>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                    <div className="space-y-3">
+                      <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">🖼</span>
+                      </div>
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="logo-upload"
+                        />
+                        <label
+                          htmlFor="logo-upload"
+                          className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 inline-block"
+                        >
+                          Logo auswählen
+                        </label>
+                        <p className="text-xs text-gray-500 mt-2">PNG, JPG bis 2MB</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Primärfarbe
-                  </label>
-                  <input
-                    type="color"
-                    defaultValue="#3B82F6"
-                    className="h-10 w-20 rounded border"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sekundärfarbe
-                  </label>
-                  <input
-                    type="color"
-                    defaultValue="#10B981"
-                    className="h-10 w-20 rounded border"
-                  />
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Firmenname
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Coaching Excellence GmbH"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Slogan/Tagline
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Potentiale entfalten, Erfolg gestalten"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Website URL
+                    </label>
+                    <input
+                      type="url"
+                      defaultValue="https://coaching-excellence.ch"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Farbschema */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">🎨</span>
+                Farbschema
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Primärfarbe
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="color"
+                      defaultValue="#3B82F6"
+                      className="h-20 w-full rounded-lg border-2 border-gray-300"
+                    />
+                    <input
+                      type="text"
+                      defaultValue="#3B82F6"
+                      className="w-full text-center border border-gray-300 rounded px-3 py-1 text-sm"
+                    />
+                    <p className="text-xs text-gray-500">Hauptfarbe für Buttons, Links</p>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Sekundärfarbe
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="color"
+                      defaultValue="#10B981"
+                      className="h-20 w-full rounded-lg border-2 border-gray-300"
+                    />
+                    <input
+                      type="text"
+                      defaultValue="#10B981"
+                      className="w-full text-center border border-gray-300 rounded px-3 py-1 text-sm"
+                    />
+                    <p className="text-xs text-gray-500">Akzentfarbe für Highlights</p>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Hintergrundfarbe
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="color"
+                      defaultValue="#F9FAFB"
+                      className="h-20 w-full rounded-lg border-2 border-gray-300"
+                    />
+                    <input
+                      type="text"
+                      defaultValue="#F9FAFB"
+                      className="w-full text-center border border-gray-300 rounded px-3 py-1 text-sm"
+                    />
+                    <p className="text-xs text-gray-500">Hintergrund des Dashboards</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Farbpalette Vorschau */}
+              <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-4">Vorschau</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-4">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">Primär Button</button>
+                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg">Sekundär Button</button>
+                    <span className="text-blue-600 font-medium">Link Beispiel</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Typografie */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">📝</span>
+                Typografie
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Hauptschrift (Headlines)
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Inter (Standard)</option>
+                    <option>Helvetica Neue</option>
+                    <option>Roboto</option>
+                    <option>Open Sans</option>
+                    <option>Lato</option>
+                  </select>
+                  <div className="mt-3 p-4 bg-gray-50 rounded">
+                    <h1 className="text-2xl font-bold">Beispiel Headline</h1>
+                    <h2 className="text-xl font-semibold text-gray-700">Beispiel Subheadline</h2>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Textschrift (Body)
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Inter (Standard)</option>
+                    <option>System Font</option>
+                    <option>Roboto</option>
+                    <option>Open Sans</option>
+                    <option>Source Sans Pro</option>
+                  </select>
+                  <div className="mt-3 p-4 bg-gray-50 rounded">
+                    <p className="text-base text-gray-900">Beispiel Fließtext für das Dashboard. Diese Schrift wird für alle regulären Inhalte verwendet.</p>
+                    <p className="text-sm text-gray-600 mt-2">Kleinerer Text für Zusatzinformationen und Metadaten.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Media & Kontakt */}
+            <div className="bg-white rounded-lg shadow p-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <span className="mr-3">📱</span>
+                Social Media & Kontaktdaten
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Social Media Links</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-blue-600">📘</span>
+                      <input
+                        type="url"
+                        placeholder="LinkedIn Profil URL"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-blue-400">🐦</span>
+                      <input
+                        type="url"
+                        placeholder="Twitter/X Profil URL"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-pink-600">📷</span>
+                      <input
+                        type="url"
+                        placeholder="Instagram Profil URL"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Kontaktinformationen</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <span>📧</span>
+                      <input
+                        type="email"
+                        placeholder="E-Mail Adresse"
+                        defaultValue="kontakt@coaching-excellence.ch"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span>📞</span>
+                      <input
+                        type="tel"
+                        placeholder="Telefonnummer"
+                        defaultValue="+41 44 123 45 67"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span>📍</span>
+                      <input
+                        type="text"
+                        placeholder="Adresse"
+                        defaultValue="Bahnhofstrasse 123, 8001 Zürich"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Speichern Button */}
+            <div className="flex justify-end">
+              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Branding-Einstellungen speichern
+              </button>
             </div>
           </div>
         );
@@ -1022,91 +1808,11 @@ const App: React.FC = () => {
               />
             )}
             {showAddToolModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                  <h3 className="text-lg font-semibold mb-4">Neues Tool hinzufügen</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    handleAddTool({
-                      name: formData.get('name'),
-                      description: formData.get('description'),
-                      category: formData.get('category'),
-                      url: formData.get('url')
-                    });
-                    e.currentTarget.reset();
-                  }}>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Tool-Name
-                        </label>
-                        <input
-                          type="text"
-                          name="name"
-                          required
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Beschreibung
-                        </label>
-                        <textarea
-                          name="description"
-                          required
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          rows={3}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Kategorie
-                        </label>
-                        <select
-                          name="category"
-                          required
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        >
-                          <option value="">Wählen Sie eine Kategorie</option>
-                          <option value="Persönlichkeitsentwicklung">Persönlichkeitsentwicklung</option>
-                          <option value="Zielsetzung">Zielsetzung</option>
-                          <option value="Kommunikation">Kommunikation</option>
-                          <option value="Führung">Führung</option>
-                          <option value="Stressmanagement">Stressmanagement</option>
-                          <option value="Karriere">Karriere</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          URL (optional)
-                        </label>
-                        <input
-                          type="url"
-                          name="url"
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          placeholder="https://..."
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setShowAddToolModal(false)}
-                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-                      >
-                        Abbrechen
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                      >
-                        Tool hinzufügen
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              <EnhancedAddToolModal
+                isOpen={showAddToolModal}
+                onClose={() => setShowAddToolModal(false)}
+                onSubmit={handleAddTool}
+              />
             )}
           </>
         )}
