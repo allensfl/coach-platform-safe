@@ -1,0 +1,550 @@
+import React, { useState, useRef } from 'react';
+import { 
+  FolderIcon, 
+  DocumentIcon, 
+  MagnifyingGlassIcon, 
+  FunnelIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  PlusIcon,
+  TagIcon,
+  UserIcon,
+  CalendarIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  ArrowDownTrayIcon,
+  DocumentArrowUpIcon,
+  BanknotesIcon,
+  DocumentTextIcon,
+  PresentationChartBarIcon,
+  DocumentCheckIcon
+} from '@heroicons/react/24/outline';
+
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  category: 'sessions' | 'invoices' | 'contracts' | 'templates';
+  tags: string[];
+  client?: string;
+  uploadDate: string;
+  lastModified: string;
+  url?: string;
+}
+
+interface Client {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
+const DocumentsModule: React.FC = () => {
+  const [documents, setDocuments] = useState<Document[]>([
+    {
+      id: '1',
+      name: 'Session-Notizen_Schmidt_2025-08-01.pdf',
+      type: 'pdf',
+      size: '2.4 MB',
+      category: 'sessions',
+      tags: ['Einzelcoaching', 'Karriere'],
+      client: 'Dr. Schmidt',
+      uploadDate: '2025-08-01',
+      lastModified: '2025-08-01'
+    },
+    {
+      id: '2',
+      name: 'Rechnung_R2025-0145.pdf',
+      type: 'pdf',
+      size: '156 KB',
+      category: 'invoices',
+      tags: ['Bezahlt', 'Q3-2025'],
+      client: 'Müller GmbH',
+      uploadDate: '2025-07-15',
+      lastModified: '2025-07-15'
+    },
+    {
+      id: '3',
+      name: 'Coaching-Vertrag_Template.docx',
+      type: 'docx',
+      size: '89 KB',
+      category: 'templates',
+      tags: ['Standard', 'Vorlage'],
+      client: undefined,
+      uploadDate: '2025-06-10',
+      lastModified: '2025-07-20'
+    }
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Mock clients for assignment
+  const clients: Client[] = [
+    { id: '1', name: 'Dr. Schmidt' },
+    { id: '2', name: 'Müller GmbH' },
+    { id: '3', name: 'Weber Consulting' },
+    { id: '4', name: 'Anna Hoffmann' }
+  ];
+
+  // Categories with icons
+  const categories = [
+    { key: 'all', label: 'Alle Dokumente', icon: DocumentIcon, count: documents.length },
+    { key: 'sessions', label: 'Session-Dokumente', icon: PresentationChartBarIcon, count: documents.filter(d => d.category === 'sessions').length },
+    { key: 'invoices', label: 'Rechnungen', icon: BanknotesIcon, count: documents.filter(d => d.category === 'invoices').length },
+    { key: 'contracts', label: 'Verträge', icon: DocumentCheckIcon, count: documents.filter(d => d.category === 'contracts').length },
+    { key: 'templates', label: 'Vorlagen', icon: DocumentTextIcon, count: documents.filter(d => d.category === 'templates').length }
+  ];
+
+  // File type icons
+  const getFileIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf': return '📄';
+      case 'docx':
+      case 'doc': return '📝';
+      case 'xlsx':
+      case 'xls': return '📊';
+      case 'pptx':
+      case 'ppt': return '📈';
+      case 'jpg':
+      case 'jpeg':
+      case 'png': return '🖼️';
+      default: return '📎';
+    }
+  };
+
+  // Filter documents
+  const filteredDocuments = documents.filter(doc => {
+    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (doc.client && doc.client.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  // Drag and drop handlers
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleFiles = (files: FileList) => {
+    Array.from(files).forEach((file, index) => {
+      const fileId = `upload-${Date.now()}-${index}`;
+      
+      // Simulate upload progress
+      setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+      
+      const simulateUpload = () => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 30;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Add document to list
+            const newDoc: Document = {
+              id: fileId,
+              name: file.name,
+              type: file.name.split('.').pop() || 'unknown',
+              size: formatFileSize(file.size),
+              category: 'sessions', // Default category
+              tags: ['Neu'],
+              uploadDate: new Date().toISOString().split('T')[0],
+              lastModified: new Date().toISOString().split('T')[0]
+            };
+            
+            setDocuments(prev => [newDoc, ...prev]);
+            
+            // Remove progress after delay
+            setTimeout(() => {
+              setUploadProgress(prev => {
+                const updated = { ...prev };
+                delete updated[fileId];
+                return updated;
+              });
+            }, 1000);
+          }
+          
+          setUploadProgress(prev => ({ ...prev, [fileId]: Math.round(progress) }));
+        }, 200);
+      };
+      
+      simulateUpload();
+    });
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dokumente</h1>
+            <p className="text-gray-600 mt-1">Verwalten Sie alle Ihre Coaching-Dokumente an einem Ort</p>
+          </div>
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          >
+            <DocumentArrowUpIcon className="w-5 h-5" />
+            Dokument hochladen
+          </button>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Dokumente durchsuchen..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+              >
+                <Squares2X2Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+              >
+                <ListBulletIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-8">
+        {/* Sidebar */}
+        <div className="w-64 flex-shrink-0">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-4">Kategorien</h3>
+            <div className="space-y-2">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <button
+                    key={category.key}
+                    onClick={() => setSelectedCategory(category.key)}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${
+                      selectedCategory === category.key
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{category.label}</span>
+                    </div>
+                    <span className={`text-sm px-2 py-1 rounded-full ${
+                      selectedCategory === category.key
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {category.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Upload Progress */}
+          {Object.keys(uploadProgress).length > 0 && (
+            <div className="mb-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Upload-Fortschritt</h4>
+                {Object.entries(uploadProgress).map(([fileId, progress]) => (
+                  <div key={fileId} className="mb-2">
+                    <div className="flex justify-between text-sm text-gray-600 mb-1">
+                      <span>Datei wird hochgeladen...</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Documents */}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDocuments.map((doc) => (
+                <div key={doc.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-4xl">{getFileIcon(doc.type)}</div>
+                    <div className="flex items-center gap-1">
+                      <button className="p-1 hover:bg-gray-100 rounded">
+                        <EyeIcon className="w-4 h-4 text-gray-400" />
+                      </button>
+                      <button className="p-1 hover:bg-gray-100 rounded">
+                        <PencilIcon className="w-4 h-4 text-gray-400" />
+                      </button>
+                      <button className="p-1 hover:bg-gray-100 rounded">
+                        <TrashIcon className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">{doc.name}</h4>
+                  
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{doc.size}</span>
+                      <span>•</span>
+                      <span>{doc.type.toUpperCase()}</span>
+                    </div>
+                    
+                    {doc.client && (
+                      <div className="flex items-center gap-2">
+                        <UserIcon className="w-4 h-4" />
+                        <span>{doc.client}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>{new Date(doc.uploadDate).toLocaleDateString('de-DE')}</span>
+                    </div>
+                  </div>
+                  
+                  {doc.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-4">
+                      {doc.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Dokument
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Kategorie
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Klient
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Größe
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Datum
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Aktionen
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredDocuments.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{getFileIcon(doc.type)}</span>
+                            <div>
+                              <div className="font-medium text-gray-900">{doc.name}</div>
+                              <div className="flex gap-1 mt-1">
+                                {doc.tags.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          <span className="capitalize">{doc.category}</span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {doc.client || '-'}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {doc.size}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {new Date(doc.uploadDate).toLocaleDateString('de-DE')}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center gap-2 justify-end">
+                            <button className="p-2 hover:bg-gray-100 rounded-lg">
+                              <EyeIcon className="w-4 h-4 text-gray-400" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 rounded-lg">
+                              <ArrowDownTrayIcon className="w-4 h-4 text-gray-400" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 rounded-lg">
+                              <PencilIcon className="w-4 h-4 text-gray-400" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 rounded-lg text-red-400 hover:text-red-600">
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {filteredDocuments.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <FolderIcon className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Keine Dokumente gefunden
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || selectedCategory !== 'all' 
+                  ? 'Versuchen Sie andere Suchbegriffe oder Filter.'
+                  : 'Laden Sie Ihr erstes Dokument hoch, um zu beginnen.'
+                }
+              </p>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium inline-flex items-center gap-2"
+              >
+                <DocumentArrowUpIcon className="w-5 h-5" />
+                Dokument hochladen
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Dokument hochladen</h3>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span className="sr-only">Schließen</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <DocumentArrowUpIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <h4 className="text-lg font-medium text-gray-900 mb-2">
+                Dateien hier ablegen
+              </h4>
+              <p className="text-gray-600 mb-4">
+                oder klicken Sie, um Dateien auszuwählen
+              </p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
+              >
+                Dateien auswählen
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => e.target.files && handleFiles(e.target.files)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+              />
+            </div>
+
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Unterstützte Formate: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG</p>
+              <p>Maximale Dateigröße: 10 MB</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DocumentsModule;
