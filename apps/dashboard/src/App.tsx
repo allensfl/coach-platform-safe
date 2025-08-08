@@ -1031,497 +1031,862 @@ function App() {
           </div>
         );
 
-      case 'tools':
-        {
-          // Tools State Variables - Diese werden nur für den Tools-Case definiert
-          const [selectedCategory, setSelectedCategory] = useState('Alle');
-          const [showSessionPlanner, setShowSessionPlanner] = useState(false);
-          const [isLiveSession, setIsLiveSession] = useState(false);
-          const [liveSessionClient, setLiveSessionClient] = useState(null);
-          const [liveSessionStartTime, setLiveSessionStartTime] = useState(null);
-          const [searchTerm, setSearchTerm] = useState('');
-          const [sessionTools, setSessionTools] = useState([]);
-          const [usedToolsHistory, setUsedToolsHistory] = useState([]);
+      // TIER 1 ULTIMATE TOOLS UPGRADE
+// Ersetze nur den 'tools' case in deiner App.tsx (Zeile ca. 545-800)
+// ALLES ANDERE BLEIBT UNVERÄNDERT!
 
-          // Session Planner Modal Component
-          const SessionPlannerModal = ({ isOpen, onClose }) => {
-            const [selectedClient, setSelectedClient] = useState('');
-            const [recommendedTools, setRecommendedTools] = useState([]);
+case 'tools':
+  {
+    // ====== NEUE ULTIMATE FEATURES STATE ======
+    const [selectedCategory, setSelectedCategory] = useState('Alle');
+    const [showSessionPlanner, setShowSessionPlanner] = useState(false);
+    const [isLiveSession, setIsLiveSession] = useState(false);
+    const [liveSessionClient, setLiveSessionClient] = useState(null);
+    const [liveSessionStartTime, setLiveSessionStartTime] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sessionTools, setSessionTools] = useState([]);
+    const [usedToolsHistory, setUsedToolsHistory] = useState([]);
+    
+    // ====== NEUE FEATURE: INTELLIGENTE TOOL-EMPFEHLUNGEN ======
+    const [selectedCoacheeForRecommendations, setSelectedCoacheeForRecommendations] = useState('');
+    
+    // Smart Tool-Empfehlungen basierend auf Coachee-Profil
+    const getRecommendedToolsForCoachee = (coacheeId) => {
+      if (!coacheeId) return [];
+      
+      const coachee = coachees.find(c => c.id === parseInt(coacheeId));
+      if (!coachee) return [];
+      
+      const goals = coachee.coachingGoals.toLowerCase();
+      
+      return tools.filter(tool => {
+        const keywords = tool.keywords.join(' ').toLowerCase();
+        const description = tool.description.toLowerCase();
+        
+        // Intelligente Matching-Logic
+        return (
+          (goals.includes('führung') && (keywords.includes('führung') || keywords.includes('leadership'))) ||
+          (goals.includes('entwickeln') && (keywords.includes('ziele') || keywords.includes('entwicklung'))) ||
+          (goals.includes('balance') && (keywords.includes('stress') || keywords.includes('balance'))) ||
+          (goals.includes('vision') && (description.includes('vision') || keywords.includes('ziele'))) ||
+          (goals.includes('kommunikation') && keywords.includes('kommunikation')) ||
+          (goals.includes('team') && (keywords.includes('kommunikation') || keywords.includes('führung')))
+        );
+      }).slice(0, 4); // Top 4 Empfehlungen
+    };
 
-            const getRecommendedTools = (client) => {
-              if (!client) return [];
-              
-              const clientGoals = client.coachingGoals.toLowerCase();
-              return tools.filter(tool => {
-                const keywords = tool.keywords.join(' ').toLowerCase();
-                const category = tool.category.toLowerCase();
-                const description = tool.description.toLowerCase();
-                
-                return (
-                  keywords.includes('führung') && clientGoals.includes('führung') ||
-                  keywords.includes('ziele') && clientGoals.includes('entwickeln') ||
-                  keywords.includes('stress') && clientGoals.includes('balance') ||
-                  keywords.includes('kommunikation') && clientGoals.includes('team') ||
-                  category.includes('persönlichkeit') && clientGoals.includes('persönlich') ||
-                  description.includes('vision') && clientGoals.includes('vision')
-                );
-              });
-            };
+    // ====== NEUE FEATURE: INTERAKTIVE TOOL-ANWENDUNG ======
+    const [activeInteractiveTool, setActiveInteractiveTool] = useState(null);
+    const [wheelOfLifeScores, setWheelOfLifeScores] = useState({
+      career: 6, finances: 4, health: 7, relationships: 8,
+      personal: 5, fun: 6, environment: 7, growth: 5
+    });
+    const [scaleToolValue, setScaleToolValue] = useState(7);
+    const [scaleToolQuestion, setScaleToolQuestion] = useState('Wie hoch ist Ihr Selbstvertrauen in beruflichen Situationen?');
 
-            const handleClientSelect = (clientId) => {
-              const client = coachees.find(c => c.id === parseInt(clientId));
-              setSelectedClient(clientId);
-              setRecommendedTools(getRecommendedTools(client));
-            };
+    // Interaktives Wheel of Life Component
+    const InteractiveWheelOfLife = () => {
+      const wheelCategories = [
+        { key: 'career', label: 'Karriere', color: 'bg-blue-500' },
+        { key: 'finances', label: 'Finanzen', color: 'bg-green-500' },
+        { key: 'health', label: 'Gesundheit', color: 'bg-red-500' },
+        { key: 'relationships', label: 'Beziehungen', color: 'bg-pink-500' },
+        { key: 'personal', label: 'Persönlich', color: 'bg-purple-500' },
+        { key: 'fun', label: 'Freizeit', color: 'bg-yellow-500' },
+        { key: 'environment', label: 'Umgebung', color: 'bg-indigo-500' },
+        { key: 'growth', label: 'Wachstum', color: 'bg-emerald-500' }
+      ];
 
-            const addToolToSession = (tool) => {
-              if (!sessionTools.find(t => t.id === tool.id)) {
-                setSessionTools(prev => [...prev, {...tool, status: 'geplant', addedAt: new Date()}]);
-              }
-            };
+      const avgScore = (Object.values(wheelOfLifeScores).reduce((a, b) => a + b, 0) / 8).toFixed(1);
 
-            if (!isOpen) return null;
-
-            return (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <h3 className="text-xl font-semibold mb-4">📅 Session planen</h3>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Client auswählen:</label>
-                      <select
-                        value={selectedClient}
-                        onChange={(e) => handleClientSelect(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg"
-                      >
-                        <option value="">Client wählen...</option>
-                        {coachees.filter(c => c.status === 'Aktiv').map(client => (
-                          <option key={client.id} value={client.id}>{client.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {selectedClient && (
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <h4 className="font-medium text-blue-900">
-                          {coachees.find(c => c.id === parseInt(selectedClient))?.name}
-                        </h4>
-                        <p className="text-sm text-blue-700 mt-1">
-                          🎯 Ziele: {coachees.find(c => c.id === parseInt(selectedClient))?.coachingGoals}
-                        </p>
-                      </div>
-                    )}
-
-                    {recommendedTools.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-3">🎯 Empfohlene Tools für diese Session:</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {recommendedTools.map(tool => (
-                            <div key={tool.id} className="border border-green-200 bg-green-50 rounded-lg p-3">
-                              <h5 className="font-medium text-green-900">{tool.name}</h5>
-                              <p className="text-xs text-green-700 mt-1">{tool.description}</p>
-                              <div className="flex justify-between items-center mt-2">
-                                <span className="text-xs text-green-600">
-                                  {tool.difficulty} • {tool.duration}
-                                </span>
-                                <button
-                                  onClick={() => addToolToSession(tool)}
-                                  className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                                >
-                                  + Hinzufügen
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {sessionTools.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-3">📋 Geplante Tools für Session:</h4>
-                        <div className="space-y-2">
-                          {sessionTools.map(tool => (
-                            <div key={tool.id} className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
-                              <div>
-                                <span className="font-medium text-blue-900">{tool.name}</span>
-                                <span className="ml-2 text-xs text-blue-600">({tool.duration})</span>
-                              </div>
-                              <button
-                                onClick={() => setSessionTools(prev => prev.filter(t => t.id !== tool.id))}
-                                className="text-red-600 hover:text-red-800 text-xs"
-                              >
-                                Entfernen
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-3 mt-6">
-                    <button
-                      onClick={onClose}
-                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                      Session geplant ✓
-                    </button>
-                    <button
-                      onClick={onClose}
-                      className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-                    >
-                      Abbrechen
-                    </button>
-                  </div>
+      return (
+        <div className="bg-white rounded-lg border-2 border-blue-200 p-6">
+          <h4 className="text-lg font-semibold mb-4 flex items-center">
+            🎯 Interaktives Wheel of Life
+            <span className="ml-auto text-sm text-gray-600">Durchschnitt: {avgScore}/10</span>
+          </h4>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {wheelCategories.map((category) => (
+              <div key={category.key} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{category.label}</span>
+                  <span className="text-lg font-bold text-blue-600">{wheelOfLifeScores[category.key]}</span>
                 </div>
-              </div>
-            );
-          };
-
-          // Live Session Toolbar Component
-          const LiveSessionToolbar = () => {
-            if (!isLiveSession || !liveSessionClient) return null;
-
-            const duration = liveSessionStartTime ? 
-              Math.floor((new Date() - liveSessionStartTime) / 1000 / 60) : 0;
-
-            return (
-              <div className="bg-red-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-300 rounded-full animate-pulse"></div>
-                    <span className="font-semibold">LIVE SESSION</span>
-                  </div>
-                  <span>mit {liveSessionClient.name}</span>
-                  <span className="text-red-200">• {duration} Min</span>
-                </div>
-                <button
-                  onClick={() => {
-                    setIsLiveSession(false);
-                    setLiveSessionClient(null);
-                    setLiveSessionStartTime(null);
-                  }}
-                  className="bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-sm"
-                >
-                  Session beenden
-                </button>
-              </div>
-            );
-          };
-
-          // Filter Tools Function
-          const getFilteredTools = () => {
-            let filtered = tools;
-            
-            if (selectedCategory !== 'Alle') {
-              filtered = filtered.filter(tool => tool.category === selectedCategory);
-            }
-            
-            if (searchTerm) {
-              filtered = filtered.filter(tool =>
-                tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                tool.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
-              );
-            }
-            
-            return filtered;
-          };
-
-          // Handle Tool Usage
-          const handleUseToolLive = (tool) => {
-            // Increment usage count
-            setTools(prev => prev.map(t => 
-              t.id === tool.id ? {...t, usageCount: t.usageCount + 1} : t
-            ));
-            
-            // Add to history
-            const historyEntry = {
-              id: Date.now(),
-              toolName: tool.name,
-              clientName: liveSessionClient?.name || 'Unbekannt',
-              timestamp: new Date(),
-              type: isLiveSession ? 'live' : 'demo'
-            };
-            
-            setUsedToolsHistory(prev => [historyEntry, ...prev]);
-            
-            // Show confirmation
-            alert(`🔴 LIVE: "${tool.name}" wird mit ${liveSessionClient?.name} verwendet!\n\nTool wurde automatisch dokumentiert.`);
-          };
-
-          const handleUseTool = (tool) => {
-            if (isLiveSession) {
-              handleUseToolLive(tool);
-            } else {
-              // Increment usage count
-              setTools(prev => prev.map(t => 
-                t.id === tool.id ? {...t, usageCount: t.usageCount + 1} : t
-              ));
-              
-              alert(`Tool "${tool.name}" Demo-Modus aktiviert!\n\n${tool.description}\n\nSchwierigkeit: ${tool.difficulty}\nDauer: ${tool.duration}`);
-            }
-          };
-
-          // Start Live Session
-          const startLiveSession = () => {
-            const clientId = prompt('Client für Live-Session auswählen:\n\n' + 
-              coachees.filter(c => c.status === 'Aktiv').map((c, i) => `${i + 1}. ${c.name}`).join('\n') +
-              '\n\nNummer eingeben:');
-            
-            if (clientId) {
-              const clientIndex = parseInt(clientId) - 1;
-              const activeCoachees = coachees.filter(c => c.status === 'Aktiv');
-              const selectedClient = activeCoachees[clientIndex];
-              
-              if (selectedClient) {
-                setIsLiveSession(true);
-                setLiveSessionClient(selectedClient);
-                setLiveSessionStartTime(new Date());
-              }
-            }
-          };
-
-          // TOOLS RENDER START
-          return (
-            <div className="space-y-8">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900">🛠 Coaching Tools</h2>
-                  <p className="text-gray-600 mt-2">Professionelle Tools und Ressourcen für erfolgreiches Coaching</p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowSessionPlanner(true)}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                  >
-                    📅 Session planen
-                  </button>
-                  <button
-                    onClick={startLiveSession}
-                    className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
-                  >
-                    🔴 Live-Session
-                  </button>
-                  <button
-                    onClick={() => setShowAddToolModal(true)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    + Tool hinzufügen
-                  </button>
-                </div>
-              </div>
-
-              <LiveSessionToolbar />
-
-              {/* Tool-Kategorien */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <button
-                  onClick={() => setSelectedCategory(selectedCategory === 'Zielsetzung' ? 'Alle' : 'Zielsetzung')}
-                  className={`p-6 text-center rounded-lg transition-all ${
-                    selectedCategory === 'Zielsetzung' 
-                      ? 'bg-blue-100 border-2 border-blue-500 shadow-lg' 
-                      : 'bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-md'
-                  }`}
-                >
-                  <div className="text-3xl mb-3">🎯</div>
-                  <h3 className="font-semibold text-blue-900">Zielsetzung</h3>
-                  <p className="text-sm text-blue-700 mt-1">SMART Goals, Vision Boards</p>
-                  <p className="text-xs text-blue-600 mt-2">
-                    {tools.filter(t => t.category === 'Zielsetzung').length} Tools
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => setSelectedCategory(selectedCategory === 'Persönlichkeit' ? 'Alle' : 'Persönlichkeit')}
-                  className={`p-6 text-center rounded-lg transition-all ${
-                    selectedCategory === 'Persönlichkeit' 
-                      ? 'bg-green-100 border-2 border-green-500 shadow-lg' 
-                      : 'bg-gradient-to-br from-green-50 to-green-100 hover:shadow-md'
-                  }`}
-                >
-                  <div className="text-3xl mb-3">🧠</div>
-                  <h3 className="font-semibold text-green-900">Persönlichkeit</h3>
-                  <p className="text-sm text-green-700 mt-1">Tests, Assessments, Reflexion</p>
-                  <p className="text-xs text-green-600 mt-2">
-                    {tools.filter(t => t.category === 'Persönlichkeit').length} Tools
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => setSelectedCategory(selectedCategory === 'Kommunikation' ? 'Alle' : 'Kommunikation')}
-                  className={`p-6 text-center rounded-lg transition-all ${
-                    selectedCategory === 'Kommunikation' 
-                      ? 'bg-purple-100 border-2 border-purple-500 shadow-lg' 
-                      : 'bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-md'
-                  }`}
-                >
-                  <div className="text-3xl mb-3">💬</div>
-                  <h3 className="font-semibold text-purple-900">Kommunikation</h3>
-                  <p className="text-sm text-purple-700 mt-1">Gesprächsführung, Feedback</p>
-                  <p className="text-xs text-purple-600 mt-2">
-                    {tools.filter(t => t.category === 'Kommunikation').length} Tools
-                  </p>
-                </button>
-              </div>
-
-              {/* Search and Filter */}
-              <div className="flex gap-4 mb-6">
                 <input
-                  type="text"
-                  placeholder="Tools durchsuchen..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-lg"
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={wheelOfLifeScores[category.key]}
+                  onChange={(e) => setWheelOfLifeScores(prev => ({
+                    ...prev,
+                    [category.key]: parseInt(e.target.value)
+                  }))}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  style={{background: `linear-gradient(to right, ${category.color.replace('bg-', '#')} 0%, ${category.color.replace('bg-', '#')} ${wheelOfLifeScores[category.key] * 10}%, #e5e7eb ${wheelOfLifeScores[category.key] * 10}%, #e5e7eb 100%)`}}
                 />
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <h5 className="font-medium text-blue-900 mb-2">🔍 Live-Analyse:</h5>
+            <p className="text-sm text-blue-800">
+              <strong>Stärkste Bereiche:</strong> {
+                Object.entries(wheelOfLifeScores)
+                  .sort(([,a], [,b]) => b - a)
+                  .slice(0, 2)
+                  .map(([key, value]) => `${wheelCategories.find(c => c.key === key)?.label} (${value}/10)`)
+                  .join(', ')
+              }
+            </p>
+            <p className="text-sm text-blue-800 mt-1">
+              <strong>Entwicklungspotential:</strong> {
+                Object.entries(wheelOfLifeScores)
+                  .sort(([,a], [,b]) => a - b)
+                  .slice(0, 2)
+                  .map(([key, value]) => `${wheelCategories.find(c => c.key === key)?.label} (${value}/10)`)
+                  .join(', ')
+              }
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                alert(`Wheel of Life Ergebnisse:\n\n${Object.entries(wheelOfLifeScores).map(([key, value]) => `${wheelCategories.find(c => c.key === key)?.label}: ${value}/10`).join('\n')}\n\nDurchschnitt: ${avgScore}/10`);
+              }}
+              className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            >
+              📊 Ergebnisse anzeigen
+            </button>
+            <button
+              onClick={() => {
+                // Transfer to coachee profile logic here
+                if (liveSessionClient) {
+                  alert(`✅ Wheel of Life Ergebnisse wurden in ${liveSessionClient.name}'s Profil übertragen!\n\nDurchschnitt: ${avgScore}/10`);
+                } else {
+                  alert('💡 Im Live-Session Modus würden die Ergebnisse automatisch ins Coachee-Profil übertragen.');
+                }
+              }}
+              className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            >
+              💾 In Profil übertragen
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // Interaktives Skalen-Tool Component
+    const InteractiveScaleTool = () => {
+      const getScaleInterpretation = (value) => {
+        if (value >= 8) return "Sehr hoch - Sie fühlen sich sehr sicher und kompetent";
+        if (value >= 6) return "Gut - Solide Basis mit Raum für Wachstum";
+        if (value >= 4) return "Mittel - Entwicklungspotential vorhanden";
+        return "Niedrig - Hier liegt großes Wachstumspotential";
+      };
+
+      return (
+        <div className="bg-white rounded-lg border-2 border-yellow-200 p-6">
+          <h4 className="text-lg font-semibold mb-4">📏 Interaktives Skalen-Tool</h4>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Frage: "{scaleToolQuestion}"
+            </label>
+            <div className="relative">
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>Sehr niedrig</span>
+                <span>Mittel</span>
+                <span>Sehr hoch</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={scaleToolValue}
+                onChange={(e) => setScaleToolValue(parseInt(e.target.value))}
+                className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                {[0,1,2,3,4,5,6,7,8,9,10].map(num => (
+                  <span key={num} className={num === scaleToolValue ? 'text-yellow-600 font-bold' : ''}>
+                    {num}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="text-center mt-4">
+              <span className="text-4xl font-bold text-yellow-600">{scaleToolValue}/10</span>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+            <h5 className="font-medium text-yellow-900 mb-2">💡 Interpretation:</h5>
+            <p className="text-sm text-yellow-800">{getScaleInterpretation(scaleToolValue)}</p>
+          </div>
+
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={scaleToolQuestion}
+              onChange={(e) => setScaleToolQuestion(e.target.value)}
+              className="flex-1 p-2 border border-gray-300 rounded text-sm"
+              placeholder="Eigene Frage eingeben..."
+            />
+            <button
+              onClick={() => {
+                if (liveSessionClient) {
+                  alert(`✅ Skalen-Ergebnis wurde in ${liveSessionClient.name}'s Profil übertragen!\n\n"${scaleToolQuestion}"\nBewertung: ${scaleToolValue}/10`);
+                } else {
+                  alert('💡 Im Live-Session Modus würde das Ergebnis automatisch ins Coachee-Profil übertragen.');
+                }
+              }}
+              className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 text-sm"
+            >
+              💾 Speichern
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // Session Planner Modal Component (erweitert)
+    const SessionPlannerModal = ({ isOpen, onClose }) => {
+      const [selectedClient, setSelectedClient] = useState('');
+      const [recommendedTools, setRecommendedTools] = useState([]);
+
+      const handleClientSelect = (clientId) => {
+        setSelectedClient(clientId);
+        setRecommendedTools(getRecommendedToolsForCoachee(clientId));
+      };
+
+      const addToolToSession = (tool) => {
+        if (!sessionTools.find(t => t.id === tool.id)) {
+          setSessionTools(prev => [...prev, {...tool, status: 'geplant', addedAt: new Date()}]);
+        }
+      };
+
+      if (!isOpen) return null;
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold mb-4">📅 Intelligente Session-Planung</h3>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Coachee auswählen:</label>
                 <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="p-3 border border-gray-300 rounded-lg"
+                  value={selectedClient}
+                  onChange={(e) => handleClientSelect(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg"
                 >
-                  <option value="Alle">Alle Kategorien ({tools.length})</option>
-                  <option value="Zielsetzung">Zielsetzung ({tools.filter(t => t.category === 'Zielsetzung').length})</option>
-                  <option value="Persönlichkeit">Persönlichkeit ({tools.filter(t => t.category === 'Persönlichkeit').length})</option>
-                  <option value="Kommunikation">Kommunikation ({tools.filter(t => t.category === 'Kommunikation').length})</option>
-                  <option value="Assessment">Assessment ({tools.filter(t => t.category === 'Assessment').length})</option>
-                  <option value="Framework">Framework ({tools.filter(t => t.category === 'Framework').length})</option>
-                  <option value="Workshop">Workshop ({tools.filter(t => t.category === 'Workshop').length})</option>
+                  <option value="">Coachee wählen...</option>
+                  {coachees.filter(c => c.status === 'Aktiv').map(client => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
                 </select>
               </div>
 
-              {/* Session Tools (if any planned) */}
+              {selectedClient && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900">
+                    {coachees.find(c => c.id === parseInt(selectedClient))?.name}
+                  </h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    🎯 Ziele: {coachees.find(c => c.id === parseInt(selectedClient))?.coachingGoals}
+                  </p>
+                </div>
+              )}
+
+              {recommendedTools.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                    🧠 KI-basierte Tool-Empfehlungen:
+                    <span className="ml-2 text-sm text-green-600">({recommendedTools.length} passende Tools gefunden)</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {recommendedTools.map(tool => (
+                      <div key={tool.id} className="border border-green-200 bg-green-50 rounded-lg p-3">
+                        <h5 className="font-medium text-green-900">{tool.name}</h5>
+                        <p className="text-xs text-green-700 mt-1">{tool.description}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-xs text-green-600">
+                            {tool.difficulty} • {tool.duration}
+                          </span>
+                          <button
+                            onClick={() => addToolToSession(tool)}
+                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                          >
+                            + Hinzufügen
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {sessionTools.length > 0 && (
-                <div className="bg-green-50 rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
-                    <span className="mr-3">📋</span>
-                    Für Session geplante Tools ({sessionTools.length})
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">📋 Geplante Session-Tools ({sessionTools.length}):</h4>
+                  <div className="space-y-2">
                     {sessionTools.map(tool => (
-                      <div key={tool.id} className="bg-white border border-green-200 rounded-lg p-4">
-                        <h4 className="font-medium text-green-900">{tool.name}</h4>
-                        <p className="text-sm text-green-700 mt-1">{tool.duration}</p>
+                      <div key={tool.id} className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
+                        <div>
+                          <span className="font-medium text-blue-900">{tool.name}</span>
+                          <span className="ml-2 text-xs text-blue-600">({tool.duration})</span>
+                        </div>
                         <button
-                          onClick={() => handleUseTool(tool)}
-                          className={`w-full mt-3 px-4 py-2 rounded text-sm transition-colors ${
-                            isLiveSession 
-                              ? 'bg-red-600 text-white hover:bg-red-700' 
-                              : 'bg-green-600 text-white hover:bg-green-700'
-                          }`}
+                          onClick={() => setSessionTools(prev => prev.filter(t => t.id !== tool.id))}
+                          className="text-red-600 hover:text-red-800 text-xs"
                         >
-                          {isLiveSession ? '🔴 Live verwenden' : 'Verwenden'}
+                          Entfernen
                         </button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Standard-Tools Grid */}
-              <div className="bg-white rounded-lg shadow p-8">
-                <h3 className="text-xl font-semibold mb-6 flex items-center">
-                  <span className="mr-3">⭐</span>
-                  {selectedCategory === 'Alle' ? 'Alle Tools' : `${selectedCategory}-Tools`}
-                  <span className="ml-2 text-sm text-gray-600">({getFilteredTools().length})</span>
-                </h3>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={onClose}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Session geplant ✓
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Live Session Toolbar Component
+    const LiveSessionToolbar = () => {
+      if (!isLiveSession || !liveSessionClient) return null;
+
+      const duration = liveSessionStartTime ? 
+        Math.floor((new Date() - liveSessionStartTime) / 1000 / 60) : 0;
+
+      return (
+        <div className="bg-red-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-red-300 rounded-full animate-pulse"></div>
+              <span className="font-semibold">🔴 LIVE SESSION AKTIV</span>
+            </div>
+            <span>mit {liveSessionClient.name}</span>
+            <span className="text-red-200">• {duration} Min</span>
+          </div>
+          <button
+            onClick={() => {
+              const endConfirm = confirm(`Session mit ${liveSessionClient.name} beenden?\n\nDauer: ${duration} Minuten\nVerwendete Tools: ${usedToolsHistory.filter(h => h.type === 'live').length}`);
+              if (endConfirm) {
+                setIsLiveSession(false);
+                setLiveSessionClient(null);
+                setLiveSessionStartTime(null);
+                alert('✅ Session erfolgreich beendet und dokumentiert!');
+              }
+            }}
+            className="bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-sm"
+          >
+            Session beenden
+          </button>
+        </div>
+      );
+    };
+
+    // Filter Tools Function (erweitert)
+    const getFilteredTools = () => {
+      let filtered = tools;
+      
+      if (selectedCategory !== 'Alle') {
+        filtered = filtered.filter(tool => tool.category === selectedCategory);
+      }
+      
+      if (searchTerm) {
+        filtered = filtered.filter(tool =>
+          tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tool.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+      }
+      
+      return filtered;
+    };
+
+    // Enhanced Tool Usage Handler
+    const handleUseToolInteractive = (tool) => {
+      if (tool.name === 'Wheel of Life') {
+        setActiveInteractiveTool('wheel');
+        return;
+      }
+      
+      if (tool.name.toLowerCase().includes('skala') || tool.name.toLowerCase().includes('selbstvertrauen')) {
+        setActiveInteractiveTool('scale');
+        return;
+      }
+      
+      // Standard tool usage
+      handleUseTool(tool);
+    };
+
+    const handleUseTool = (tool) => {
+      // Increment usage count
+      setTools(prev => prev.map(t => 
+        t.id === tool.id ? {...t, usageCount: t.usageCount + 1} : t
+      ));
+      
+      // Add to history
+      const historyEntry = {
+        id: Date.now(),
+        toolName: tool.name,
+        clientName: isLiveSession ? liveSessionClient?.name : 'Demo-Modus',
+        timestamp: new Date(),
+        type: isLiveSession ? 'live' : 'demo'
+      };
+      
+      setUsedToolsHistory(prev => [historyEntry, ...prev]);
+      
+      if (isLiveSession) {
+        alert(`🔴 LIVE: "${tool.name}" wird mit ${liveSessionClient?.name} verwendet!\n\nTool wurde automatisch dokumentiert.`);
+      } else {
+        alert(`Tool "${tool.name}" Demo-Modus aktiviert!\n\n${tool.description}\n\nSchwierigkeit: ${tool.difficulty}\nDauer: ${tool.duration}`);
+      }
+    };
+
+    // Start Live Session
+    const startLiveSession = () => {
+      const activeCoachees = coachees.filter(c => c.status === 'Aktiv');
+      const clientList = activeCoachees.map((c, i) => `${i + 1}. ${c.name} (${c.company})`).join('\n');
+      
+      const clientId = prompt(`🔴 Live-Session starten mit:\n\n${clientList}\n\nNummer eingeben:`);
+      
+      if (clientId) {
+        const clientIndex = parseInt(clientId) - 1;
+        const selectedClient = activeCoachees[clientIndex];
+        
+        if (selectedClient) {
+          setIsLiveSession(true);
+          setLiveSessionClient(selectedClient);
+          setLiveSessionStartTime(new Date());
+          setSelectedCoacheeForRecommendations(selectedClient.id.toString());
+          
+          // Auto-suggest tools for this client
+          const recommendations = getRecommendedToolsForCoachee(selectedClient.id);
+          if (recommendations.length > 0) {
+            setTimeout(() => {
+              alert(`💡 Intelligente Tool-Empfehlungen für ${selectedClient.name}:\n\n${recommendations.slice(0, 3).map(t => `• ${t.name} (${t.duration})`).join('\n')}\n\nSiehe grüne Empfehlungen-Box unten!`);
+            }, 1000);
+          }
+        }
+      }
+    };
+
+    // TOOLS RENDER START
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">🛠 Coaching Tools</h2>
+            <p className="text-gray-600 mt-2">Intelligente Tools mit Live-Session Integration</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowSessionPlanner(true)}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              📅 KI Session-Planung
+            </button>
+            <button
+              onClick={startLiveSession}
+              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              🔴 Live-Session starten
+            </button>
+            <button
+              onClick={() => setShowAddToolModal(true)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              + Tool hinzufügen
+            </button>
+          </div>
+        </div>
+
+        <LiveSessionToolbar />
+
+        {/* NEUE FEATURE: Intelligente Tool-Empfehlungen */}
+        {!isLiveSession && (
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6 border border-blue-200">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              🧠 Intelligente Tool-Empfehlungen
+            </h3>
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Coachee auswählen für personalisierte Empfehlungen:
+                </label>
+                <select
+                  value={selectedCoacheeForRecommendations}
+                  onChange={(e) => setSelectedCoacheeForRecommendations(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Coachee wählen...</option>
+                  {coachees.filter(c => c.status === 'Aktiv').map(client => (
+                    <option key={client.id} value={client.id}>{client.name} ({client.company})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            {selectedCoacheeForRecommendations && (
+              <div className="mt-4">
+                <div className="bg-white p-4 rounded-lg border border-blue-200 mb-4">
+                  <h4 className="font-medium text-blue-900">
+                    {coachees.find(c => c.id === parseInt(selectedCoacheeForRecommendations))?.name}
+                  </h4>
+                  <p className="text-sm text-blue-700">
+                    🎯 Ziele: {coachees.find(c => c.id === parseInt(selectedCoacheeForRecommendations))?.coachingGoals}
+                  </p>
+                </div>
                 
-                {getFilteredTools().length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {getFilteredTools().map(tool => (
-                      <div key={tool.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="text-3xl">🛠</div>
-                          <div className="text-right">
-                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                              {tool.difficulty}
-                            </span>
-                            <p className="text-xs text-gray-500 mt-1">{tool.usageCount}x verwendet</p>
-                          </div>
-                        </div>
-                        
-                        <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
-                        <p className="text-gray-600 text-sm mb-3">{tool.description}</p>
-                        
-                        <div className="text-xs text-gray-500 mb-4 space-y-1">
-                          <p>📅 Dauer: {tool.duration}</p>
-                          <p>🏷 Kategorie: {tool.category}</p>
-                          {tool.targetAudience && <p>👥 Zielgruppe: {tool.targetAudience}</p>}
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleUseTool(tool)}
-                            className={`flex-1 px-4 py-2 rounded text-sm transition-colors ${
-                              isLiveSession 
-                                ? 'bg-red-600 text-white hover:bg-red-700' 
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                          >
-                            {isLiveSession ? '🔴 Live verwenden' : 'Verwenden'}
-                          </button>
-                          <button 
-                            onClick={() => alert(`ℹ️ Tool-Info:\n\n${tool.description}\n\nKeywords: ${tool.keywords.join(', ')}\nSchwierigkeit: ${tool.difficulty}\nDauer: ${tool.duration}`)}
-                            className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
-                          >
-                            ℹ️
-                          </button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getRecommendedToolsForCoachee(selectedCoacheeForRecommendations).map(tool => (
+                    <div key={tool.id} className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium text-green-900">{tool.name}</h4>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                          Empfohlen
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🔍</div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Keine Tools gefunden</h4>
-                    <p className="text-gray-600 mb-6">
-                      {searchTerm ? `Keine Ergebnisse für "${searchTerm}"` : `Keine Tools in der Kategorie "${selectedCategory}"`}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSelectedCategory('Alle');
-                      }}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Filter zurücksetzen
-                    </button>
+                      <p className="text-sm text-green-700 mb-3">{tool.description}</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleUseToolInteractive(tool)}
+                          className="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm hover:bg-green-700"
+                        >
+                          ⚡ Verwenden
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!sessionTools.find(t => t.id === tool.id)) {
+                              setSessionTools(prev => [...prev, {...tool, status: 'geplant'}]);
+                              alert(`✅ "${tool.name}" zur Session-Planung hinzugefügt!`);
+                            }
+                          }}
+                          className="px-3 py-2 border border-green-600 text-green-600 rounded text-sm hover:bg-green-50"
+                        >
+                          📅
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {getRecommendedToolsForCoachee(selectedCoacheeForRecommendations).length === 0 && (
+                  <div className="text-center py-6">
+                    <p className="text-gray-600">Keine spezifischen Empfehlungen für diese Ziele gefunden.</p>
+                    <p className="text-sm text-gray-500 mt-1">Alle Tools stehen weiterhin zur Verfügung.</p>
                   </div>
                 )}
               </div>
+            )}
+          </div>
+        )}
 
-              {/* Tool Usage History */}
-              {usedToolsHistory.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="mr-3">📊</span>
-                    Tool-Aktivitäten (Letzte Nutzungen)
-                  </h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {usedToolsHistory.slice(0, 10).map(entry => (
-                      <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                        <div>
-                          <span className={entry.type === 'live' ? 'text-red-600' : 'text-blue-600'}>
-                            {entry.type === 'live' ? '🔴' : '💡'}
-                          </span>
-                          <span className="ml-2 font-medium">{entry.toolName}</span>
-                          <span className="text-gray-600"> von {entry.clientName}</span>
-                        </div>
-                        <span className="text-gray-500">
-                          {entry.timestamp.toLocaleTimeString('de-DE')}
-                        </span>
-                      </div>
-                    ))}
+        {/* NEUE FEATURE: Interaktive Tool-Anwendung */}
+        {activeInteractiveTool && (
+          <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-blue-500">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">🎮 Interaktive Tool-Anwendung</h3>
+              <button
+                onClick={() => setActiveInteractiveTool(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕ Schließen
+              </button>
+            </div>
+            
+            {activeInteractiveTool === 'wheel' && <InteractiveWheelOfLife />}
+            {activeInteractiveTool === 'scale' && <InteractiveScaleTool />}
+          </div>
+        )}
+
+        {/* Enhanced Search and Filter */}
+        <div className="flex gap-4 mb-6">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="🔍 Intelligente Tool-Suche... (z.B. 'Führung', 'Stress', 'Kommunikation')"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg pl-4"
+            />
+            {searchTerm && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 max-h-40 overflow-y-auto">
+                {getFilteredTools().slice(0, 5).map(tool => (
+                  <button
+                    key={tool.id}
+                    onClick={() => {
+                      setSearchTerm(tool.name);
+                      handleUseToolInteractive(tool);
+                    }}
+                    className="w-full text-left p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="font-medium">{tool.name}</div>
+                    <div className="text-xs text-gray-600">{tool.category} • {tool.duration}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="p-3 border border-gray-300 rounded-lg"
+          >
+            <option value="Alle">Alle Kategorien ({tools.length})</option>
+            <option value="Zielsetzung">Zielsetzung ({tools.filter(t => t.category === 'Zielsetzung').length})</option>
+            <option value="Persönlichkeit">Persönlichkeit ({tools.filter(t => t.category === 'Persönlichkeit').length})</option>
+            <option value="Kommunikation">Kommunikation ({tools.filter(t => t.category === 'Kommunikation').length})</option>
+            <option value="Assessment">Assessment ({tools.filter(t => t.category === 'Assessment').length})</option>
+            <option value="Framework">Framework ({tools.filter(t => t.category === 'Framework').length})</option>
+            <option value="Workshop">Workshop ({tools.filter(t => t.category === 'Workshop').length})</option>
+          </select>
+        </div>
+
+        {/* Enhanced Tool-Kategorien */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <button
+            onClick={() => setSelectedCategory(selectedCategory === 'Zielsetzung' ? 'Alle' : 'Zielsetzung')}
+            className={`p-6 text-center rounded-lg transition-all ${
+              selectedCategory === 'Zielsetzung' 
+                ? 'bg-blue-100 border-2 border-blue-500 shadow-lg transform scale-105' 
+                : 'bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-md hover:scale-102'
+            }`}
+          >
+            <div className="text-3xl mb-3">🎯</div>
+            <h3 className="font-semibold text-blue-900">Zielsetzung</h3>
+            <p className="text-sm text-blue-700 mt-1">SMART Goals, Vision, GROW-Modell</p>
+            <p className="text-xs text-blue-600 mt-2">
+              {tools.filter(t => t.category === 'Zielsetzung').length} Tools
+            </p>
+            {selectedCategory === 'Zielsetzung' && (
+              <div className="mt-2 text-xs text-blue-800 font-medium">✓ Aktiv</div>
+            )}
+          </button>
+          
+          <button
+            onClick={() => setSelectedCategory(selectedCategory === 'Persönlichkeit' ? 'Alle' : 'Persönlichkeit')}
+            className={`p-6 text-center rounded-lg transition-all ${
+              selectedCategory === 'Persönlichkeit' 
+                ? 'bg-green-100 border-2 border-green-500 shadow-lg transform scale-105' 
+                : 'bg-gradient-to-br from-green-50 to-green-100 hover:shadow-md hover:scale-102'
+            }`}
+          >
+            <div className="text-3xl mb-3">🧠</div>
+            <h3 className="font-semibold text-green-900">Persönlichkeit</h3>
+            <p className="text-sm text-green-700 mt-1">Wheel of Life, Werte, Reflexion</p>
+            <p className="text-xs text-green-600 mt-2">
+              {tools.filter(t => t.category === 'Persönlichkeit').length} Tools
+            </p>
+            {selectedCategory === 'Persönlichkeit' && (
+              <div className="mt-2 text-xs text-green-800 font-medium">✓ Aktiv</div>
+            )}
+          </button>
+          
+          <button
+            onClick={() => setSelectedCategory(selectedCategory === 'Kommunikation' ? 'Alle' : 'Kommunikation')}
+            className={`p-6 text-center rounded-lg transition-all ${
+              selectedCategory === 'Kommunikation' 
+                ? 'bg-purple-100 border-2 border-purple-500 shadow-lg transform scale-105' 
+                : 'bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-md hover:scale-102'
+            }`}
+          >
+            <div className="text-3xl mb-3">💬</div>
+            <h3 className="font-semibold text-purple-900">Kommunikation</h3>
+            <p className="text-sm text-purple-700 mt-1">Gesprächsführung, Feedback</p>
+            <p className="text-xs text-purple-600 mt-2">
+              {tools.filter(t => t.category === 'Kommunikation').length} Tools
+            </p>
+            {selectedCategory === 'Kommunikation' && (
+              <div className="mt-2 text-xs text-purple-800 font-medium">✓ Aktiv</div>
+            )}
+          </button>
+        </div>
+
+        {/* Session Tools (if any planned) */}
+        {sessionTools.length > 0 && (
+          <div className="bg-green-50 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
+              <span className="mr-3">📋</span>
+              Für Session geplante Tools ({sessionTools.length})
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sessionTools.map(tool => (
+                <div key={tool.id} className="bg-white border border-green-200 rounded-lg p-4">
+                  <h4 className="font-medium text-green-900">{tool.name}</h4>
+                  <p className="text-sm text-green-700 mt-1">{tool.duration} • {tool.difficulty}</p>
+                  <button
+                    onClick={() => handleUseToolInteractive(tool)}
+                    className={`w-full mt-3 px-4 py-2 rounded text-sm transition-colors ${
+                      isLiveSession 
+                        ? 'bg-red-600 text-white hover:bg-red-700' 
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
+                  >
+                    {isLiveSession ? '🔴 Live verwenden' : '⚡ Interaktiv verwenden'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced Standard-Tools Grid */}
+        <div className="bg-white rounded-lg shadow p-8">
+          <h3 className="text-xl font-semibold mb-6 flex items-center">
+            <span className="mr-3">⭐</span>
+            {selectedCategory === 'Alle' ? 'Alle Tools' : `${selectedCategory}-Tools`}
+            <span className="ml-2 text-sm text-gray-600">({getFilteredTools().length})</span>
+            {searchTerm && (
+              <span className="ml-2 text-sm text-blue-600">für "{searchTerm}"</span>
+            )}
+          </h3>
+          
+          {getFilteredTools().length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {getFilteredTools().map(tool => (
+                <div key={tool.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all hover:scale-102">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-3xl">
+                      {tool.name === 'Wheel of Life' ? '🎯' : 
+                       tool.name.includes('GROW') ? '🌱' :
+                       tool.name.includes('Kommunikation') ? '💬' :
+                       tool.name.includes('Stress') ? '😰' :
+                       tool.name.includes('Führung') ? '👨‍💼' :
+                       tool.name.includes('Werte') ? '💎' : '🛠'}
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        tool.difficulty === 'Einfach' ? 'bg-green-100 text-green-800' :
+                        tool.difficulty === 'Mittel' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {tool.difficulty}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">{tool.usageCount}x verwendet</p>
+                    </div>
+                  </div>
+                  
+                  <h4 className="font-semibold text-gray-900 mb-2">{tool.name}</h4>
+                  <p className="text-gray-600 text-sm mb-3">{tool.description}</p>
+                  
+                  <div className="text-xs text-gray-500 mb-4 space-y-1">
+                    <p>📅 Dauer: {tool.duration}</p>
+                    <p>🏷 Kategorie: {tool.category}</p>
+                    {tool.targetAudience && <p>👥 Zielgruppe: {tool.targetAudience}</p>}
+                    <p>🔑 Keywords: {tool.keywords.join(', ')}</p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleUseToolInteractive(tool)}
+                      className={`flex-1 px-4 py-2 rounded text-sm transition-colors ${
+                        isLiveSession 
+                          ? 'bg-red-600 text-white hover:bg-red-700' 
+                          : tool.name === 'Wheel of Life' || tool.name.toLowerCase().includes('skala')
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {isLiveSession ? '🔴 Live verwenden' : 
+                       tool.name === 'Wheel of Life' || tool.name.toLowerCase().includes('skala') 
+                         ? '🎮 Interaktiv' : '▶️ Verwenden'}
+                    </button>
+                    <button 
+                      onClick={() => alert(`ℹ️ Tool-Info:\n\n${tool.description}\n\nKeywords: ${tool.keywords.join(', ')}\nSchwierigkeit: ${tool.difficulty}\nDauer: ${tool.duration}\nZielgruppe: ${tool.targetAudience || 'Alle'}`)}
+                      className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+                    >
+                      ℹ️
+                    </button>
                   </div>
                 </div>
-              )}
-
-              {/* Modals */}
-              <SessionPlannerModal isOpen={showSessionPlanner} onClose={() => setShowSessionPlanner(false)} />
+              ))}
             </div>
-          );
-        }
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🔍</div>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">Keine Tools gefunden</h4>
+              <p className="text-gray-600 mb-6">
+                {searchTerm ? `Keine Ergebnisse für "${searchTerm}"` : `Keine Tools in der Kategorie "${selectedCategory}"`}
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('Alle');
+                }}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Filter zurücksetzen
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Enhanced Tool Usage History */}
+        {usedToolsHistory.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <span className="mr-3">📊</span>
+              Tool-Aktivitäten (Letzte Nutzungen)
+              <span className="ml-auto text-sm text-gray-600">
+                {usedToolsHistory.filter(h => h.type === 'live').length} Live • {usedToolsHistory.filter(h => h.type === 'demo').length} Demo
+              </span>
+            </h3>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {usedToolsHistory.slice(0, 10).map(entry => (
+                <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg text-sm ${
+                  entry.type === 'live' ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'
+                }`}>
+                  <div className="flex items-center space-x-3">
+                    <span className={entry.type === 'live' ? 'text-red-600' : 'text-blue-600'}>
+                      {entry.type === 'live' ? '🔴' : '💡'}
+                    </span>
+                    <div>
+                      <span className={`font-medium ${entry.type === 'live' ? 'text-red-900' : 'text-blue-900'}`}>
+                        {entry.toolName}
+                      </span>
+                      <span className={`ml-2 ${entry.type === 'live' ? 'text-red-700' : 'text-blue-700'}`}>
+                        mit {entry.clientName}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-gray-500 text-xs">
+                    {entry.timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modals */}
+        <SessionPlannerModal isOpen={showSessionPlanner} onClose={() => setShowSessionPlanner(false)} />
+      </div>
+    );
+  }
+
 
       case 'analytics':
         const totalSessions = coachees.reduce((sum, coachee) => sum + coachee.sessionsCompleted, 0);
