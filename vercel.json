@@ -1,7 +1,7 @@
 {
   "buildCommand": "cd apps/dashboard && npm run build",
   "outputDirectory": "apps/dashboard/dist", 
-  "installCommand": "npm ci",
+  "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [
     {
       "source": "/coachee/(.*)",
